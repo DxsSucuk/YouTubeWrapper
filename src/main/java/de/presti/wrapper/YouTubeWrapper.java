@@ -3,6 +3,7 @@ package de.presti.wrapper;
 import com.google.gson.*;
 import de.presti.wrapper.entities.search.SearchResult;
 import de.presti.wrapper.entities.search.VideoSearchResult;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.URI;
@@ -22,6 +23,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author Presti
  * @since 1.0.0
  */
+@Slf4j
 public class YouTubeWrapper {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -55,6 +57,14 @@ public class YouTubeWrapper {
         for (int i = 0; i < actualContent.size(); i++) {
             JsonObject result = actualContent.get(i).getAsJsonObject();
             if (result.has("videoRenderer")) {
+                results.add(GSON.fromJson(result.getAsJsonObject("videoRenderer"), VideoSearchResult.class));
+            } else if (result.has("channelRenderer")) {
+                results.add(GSON.fromJson(result.getAsJsonObject("channelRenderer"), SearchResult.class));
+            } else if (result.has("shelfRenderer")) {
+                // Mostly not actual stuff related to the search query.
+                break;
+            }
+            /*if (result.has("videoRenderer")) {
                 JsonObject videoRenderer = result.getAsJsonObject("videoRenderer");
 
                 String title = videoRenderer.getAsJsonObject("title").getAsJsonArray("runs").get(0).getAsJsonObject()
@@ -64,7 +74,7 @@ public class YouTubeWrapper {
                         .getAsJsonPrimitive("simpleText").getAsString().replaceAll("[^0-9.]", ""));
 
                 results.add(new VideoSearchResult(videoRenderer.getAsJsonPrimitive("videoId").getAsString(), title, viewCount));
-            }
+            }*/
         }
 
         return results;

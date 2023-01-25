@@ -10,9 +10,7 @@ import java.net.http.HttpResponse;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        YouTubeWrapper.search("memerinoto")
-                .stream().filter(searchResult -> searchResult instanceof VideoSearchResult)
-                .map(c -> (VideoSearchResult)c).forEach(c -> System.out.println(c.getTitle()));
+        YouTubeWrapper.search("memerinoto").forEach(c -> System.out.println(c.getId()));
     }
 
     public void testStuff() throws Exception {
