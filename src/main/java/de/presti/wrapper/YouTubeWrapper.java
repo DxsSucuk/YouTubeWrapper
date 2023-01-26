@@ -7,7 +7,6 @@ import de.presti.wrapper.entities.channel.ChannelVideoResult;
 import de.presti.wrapper.entities.search.ChannelSearchResult;
 import de.presti.wrapper.entities.search.SearchResult;
 import de.presti.wrapper.entities.search.VideoSearchResult;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.net.URI;
@@ -27,7 +26,6 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author Presti
  * @since 1.0.0
  */
-@Slf4j
 public class YouTubeWrapper {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
