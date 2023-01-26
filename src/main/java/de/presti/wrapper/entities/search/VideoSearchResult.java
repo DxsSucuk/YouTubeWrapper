@@ -21,8 +21,10 @@ public class VideoSearchResult extends SearchResult {
         ownerId = jsonObject.getAsJsonObject("ownerText").getAsJsonArray("runs").get(0).getAsJsonObject()
                 .getAsJsonObject("navigationEndpoint").getAsJsonObject("browseEndpoint")
                 .getAsJsonPrimitive("browseId").getAsString();
-
-        viewCountText = jsonObject.getAsJsonObject("viewCountText").getAsJsonPrimitive("simpleText").getAsString();
+        
+        if (jsonObject.has("viewCountText")) {
+            viewCountText = jsonObject.getAsJsonObject("viewCountText").getAsJsonPrimitive("simpleText").getAsString();
+        }
     }
 
     public long getViews() {
