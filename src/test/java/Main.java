@@ -1,5 +1,3 @@
-package de.presti.wrapper;
-
 import com.google.gson.*;
 
 import java.net.URI;
