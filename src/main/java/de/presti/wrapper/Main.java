@@ -1,7 +1,6 @@
 package de.presti.wrapper;
 
 import com.google.gson.*;
-import de.presti.wrapper.entities.search.VideoSearchResult;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -10,7 +9,7 @@ import java.net.http.HttpResponse;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        YouTubeWrapper.search("memerinoto").forEach(c -> System.out.println(c.getId()));
+        YouTubeWrapper.getChannelVideo("UCg9sQ_VRxgLKCSpuAeqaIBQ").getVideos().forEach(c -> System.out.println(c.getTitle() + " - " + c.getId()));
     }
 
     public void testStuff() throws Exception {

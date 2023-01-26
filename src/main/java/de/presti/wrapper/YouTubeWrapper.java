@@ -1,6 +1,9 @@
 package de.presti.wrapper;
 
 import com.google.gson.*;
+import de.presti.wrapper.entities.channel.ChannelResult;
+import de.presti.wrapper.entities.channel.ChannelVideoResult;
+import de.presti.wrapper.entities.search.ChannelSearchResult;
 import de.presti.wrapper.entities.search.SearchResult;
 import de.presti.wrapper.entities.search.VideoSearchResult;
 import lombok.extern.slf4j.Slf4j;
@@ -30,18 +33,16 @@ public class YouTubeWrapper {
 
     public static String BASE_URL = "https://www.youtube.com/youtubei/v1";
 
-    public static String[] KEYS = new String[] {
+    public static String[] KEYS = new String[]{
             "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
             "AIzaSyCtkvNIR1HCEwzsqK6JuE6KqpyjusIRI30",
             "AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w",
-            "AIzaSyC8UYZpvA2eknNex0Pjid0_eTLJoDu6los",
-            "AIzaSyCjc_pVEDi4qsv5MtC2dMXzpIaDoRFLsxw",
-            "AIzaSyDHQ9ipnphqTzDqZsbtd8_Ru4_kiKVQe2k"
+            "AIzaSyCjc_pVEDi4qsv5MtC2dMXzpIaDoRFLsxw"
     };
 
     public static JsonObject CONTEXT;
 
-    public static List<SearchResult> search(String query) throws IOException, InterruptedException {
+    public static List<SearchResult> search(String query) throws IllegalAccessException, IOException, InterruptedException {
         List<SearchResult> results = new ArrayList<>();
         query = URLEncoder.encode(query, StandardCharsets.UTF_8);
 
@@ -56,31 +57,40 @@ public class YouTubeWrapper {
 
         for (int i = 0; i < actualContent.size(); i++) {
             JsonObject result = actualContent.get(i).getAsJsonObject();
-            if (result.has("videoRenderer")) {
-                results.add(GSON.fromJson(result.getAsJsonObject("videoRenderer"), VideoSearchResult.class));
-            } else if (result.has("channelRenderer")) {
-                results.add(GSON.fromJson(result.getAsJsonObject("channelRenderer"), SearchResult.class));
-            } else if (result.has("shelfRenderer")) {
-                // Mostly not actual stuff related to the search query.
-                break;
+            try {
+                if (result.has("videoRenderer")) {
+                    VideoSearchResult videoSearchResult = new VideoSearchResult(result.getAsJsonObject("videoRenderer"));
+                    results.add(videoSearchResult);
+                } else if (result.has("channelRenderer")) {
+                    ChannelSearchResult channelSearchResult = new ChannelSearchResult(result.getAsJsonObject("channelRenderer"));
+                    results.add(channelSearchResult);
+                } else if (result.has("shelfRenderer")) {
+                    // Mostly not actual stuff related to the search query.
+                }
+            } catch (Exception e) {
+                log.error("Error while parsing search result: " + result.toString(), e);
             }
-            /*if (result.has("videoRenderer")) {
-                JsonObject videoRenderer = result.getAsJsonObject("videoRenderer");
-
-                String title = videoRenderer.getAsJsonObject("title").getAsJsonArray("runs").get(0).getAsJsonObject()
-                        .getAsJsonPrimitive("text").getAsString();
-
-                long viewCount = Long.parseLong(videoRenderer.getAsJsonObject("viewCountText")
-                        .getAsJsonPrimitive("simpleText").getAsString().replaceAll("[^0-9.]", ""));
-
-                results.add(new VideoSearchResult(videoRenderer.getAsJsonPrimitive("videoId").getAsString(), title, viewCount));
-            }*/
         }
 
         return results;
     }
 
-    private static JsonElement send(String path, JsonObject requestObject) throws IOException, InterruptedException {
+    public static ChannelResult getChannel(String channelId) throws IllegalAccessException, IOException, InterruptedException {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("browseId", channelId);
+
+        return new ChannelResult(send("/browse", jsonObject).getAsJsonObject());
+    }
+
+    public static ChannelVideoResult getChannelVideo(String channelId) throws IllegalAccessException, IOException, InterruptedException {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("browseId", channelId);
+        jsonObject.addProperty("params", "EgZ2aWRlb3PyBgQKAjoA");
+
+        return new ChannelVideoResult(send("/browse", jsonObject).getAsJsonObject());
+    }
+
+    private static JsonElement send(String path, JsonObject requestObject) throws IllegalAccessException, IOException, InterruptedException {
 
         if (CONTEXT == null) {
             CONTEXT = createContext();
@@ -88,13 +98,27 @@ public class YouTubeWrapper {
 
         requestObject.add("context", CONTEXT);
 
+        String currentKey = KEYS[ThreadLocalRandom.current().nextInt(KEYS.length)];
+        log.info("Using key: " + currentKey);
+
         HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create(BASE_URL + path + "?key=" + KEYS[ThreadLocalRandom.current().nextInt(KEYS.length)] + "&prettyPrint=true"))
+                .uri(URI.create(BASE_URL + path + "?key=" + currentKey + "&prettyPrint=true"))
                 .POST(HttpRequest.BodyPublishers.ofString(requestObject.toString())).build();
 
         HttpResponse<String> httpResponse = HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
-        return JsonParser.parseString(httpResponse.body());
+        JsonElement jsonElement = JsonParser.parseString(httpResponse.body());
+
+        if (jsonElement.getAsJsonObject().has("error")) {
+            if (jsonElement.getAsJsonObject()
+                    .getAsJsonObject("error").getAsJsonPrimitive("code").getAsInt() == 403) {
+                throw new IllegalAccessException("Invalid API key: " + currentKey);
+            } else {
+                throw new IOException("Error while sending request: " + jsonElement);
+            }
+        }
+
+        return jsonElement;
     }
 
     private static JsonObject createContext() {

@@ -1,6 +1,6 @@
 package de.presti.wrapper.entities.search;
 
-import com.google.gson.annotations.SerializedName;
+import com.google.gson.JsonObject;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,14 +9,21 @@ import lombok.Getter;
 @AllArgsConstructor
 public class VideoSearchResult extends SearchResult {
 
-    @SerializedName(value = "ownerText.runs[0].browseEndpoint.browseId")
-    String ownerId;
-
-    @SerializedName(value = "title.runs[0].text")
-    String title;
-
-    @SerializedName(value = "viewCountText.simpleText")
     String viewCountText;
+
+    public VideoSearchResult(JsonObject jsonObject) {
+        super(jsonObject);
+        title = jsonObject.getAsJsonObject("title").getAsJsonArray("runs").get(0).getAsJsonObject()
+                .getAsJsonPrimitive("text").getAsString();
+
+        id = jsonObject.getAsJsonPrimitive("videoId").getAsString();
+
+        ownerId = jsonObject.getAsJsonObject("ownerText").getAsJsonArray("runs").get(0).getAsJsonObject()
+                .getAsJsonObject("navigationEndpoint").getAsJsonObject("browseEndpoint")
+                .getAsJsonPrimitive("browseId").getAsString();
+
+        viewCountText = jsonObject.getAsJsonObject("viewCountText").getAsJsonPrimitive("simpleText").getAsString();
+    }
 
     public long getViews() {
         return Long.parseLong(viewCountText.replaceAll("[^0-9]", ""));
