@@ -43,14 +43,19 @@ public class YouTubeWrapper {
 
     public static JsonObject CONTEXT;
 
-    public static List<SearchResult> search(String query) throws IllegalAccessException, IOException, InterruptedException {
+    public static List<SearchResult> search(String query, SearchResult.FILTER filter) throws IllegalAccessException, IOException, InterruptedException {
         List<SearchResult> results = new ArrayList<>();
         query = URLEncoder.encode(query, StandardCharsets.UTF_8);
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("query", query);
 
+        if (filter != null && filter != SearchResult.FILTER.NONE) {
+            jsonObject.addProperty("params", filter.getParams());
+        }
+
         JsonElement jsonElement = send("/search", jsonObject);
+
         JsonArray actualContent = jsonElement.getAsJsonObject().getAsJsonObject("contents")
                 .getAsJsonObject("twoColumnSearchResultsRenderer").getAsJsonObject("primaryContents")
                 .getAsJsonObject("sectionListRenderer").getAsJsonArray("contents").get(0).getAsJsonObject()
@@ -58,18 +63,12 @@ public class YouTubeWrapper {
 
         for (int i = 0; i < actualContent.size(); i++) {
             JsonObject result = actualContent.get(i).getAsJsonObject();
-            try {
-                if (result.has("videoRenderer")) {
-                    VideoSearchResult videoSearchResult = new VideoSearchResult(result.getAsJsonObject("videoRenderer"));
-                    results.add(videoSearchResult);
-                } else if (result.has("channelRenderer")) {
-                    ChannelSearchResult channelSearchResult = new ChannelSearchResult(result.getAsJsonObject("channelRenderer"));
-                    results.add(channelSearchResult);
-                } else if (result.has("shelfRenderer")) {
-                    // Mostly not actual stuff related to the search query.
-                }
-            } catch (Exception e) {
-                log.error("Error while parsing search result: " + result.toString(), e);
+            if (result.has("videoRenderer")) {
+                VideoSearchResult videoSearchResult = new VideoSearchResult(result.getAsJsonObject("videoRenderer"));
+                results.add(videoSearchResult);
+            } else if (result.has("channelRenderer")) {
+                ChannelSearchResult channelSearchResult = new ChannelSearchResult(result.getAsJsonObject("channelRenderer"));
+                results.add(channelSearchResult);
             }
         }
 
@@ -107,7 +106,6 @@ public class YouTubeWrapper {
         requestObject.add("context", CONTEXT);
 
         String currentKey = KEYS[ThreadLocalRandom.current().nextInt(KEYS.length)];
-        log.info("Using key: " + currentKey);
 
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + path + "?key=" + currentKey + "&prettyPrint=true"))

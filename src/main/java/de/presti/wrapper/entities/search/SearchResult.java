@@ -20,10 +20,11 @@ public class SearchResult {
     public SearchResult(JsonObject jsonObject) {
     }
 
-    enum FILTER {
+    public enum FILTER {
 
         CHANNEL("EgIQAg%3D%3D"),
-        VIDEO("EgIQAQ%3D%3D");
+        VIDEO("EgIQAQ%3D%3D"),
+        NONE("");
 
         @Getter(AccessLevel.PUBLIC)
         String params;
