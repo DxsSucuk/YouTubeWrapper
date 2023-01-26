@@ -1,6 +1,7 @@
 package de.presti.wrapper;
 
 import com.google.gson.*;
+import de.presti.wrapper.entities.VideoResult;
 import de.presti.wrapper.entities.channel.ChannelResult;
 import de.presti.wrapper.entities.channel.ChannelVideoResult;
 import de.presti.wrapper.entities.search.ChannelSearchResult;
@@ -88,6 +89,13 @@ public class YouTubeWrapper {
         jsonObject.addProperty("params", "EgZ2aWRlb3PyBgQKAjoA");
 
         return new ChannelVideoResult(send("/browse", jsonObject).getAsJsonObject());
+    }
+
+    public static VideoResult getVideo(String videoId) throws IllegalAccessException, IOException, InterruptedException {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("videoId", videoId);
+
+        return new VideoResult(send("/player", jsonObject).getAsJsonObject(), false);
     }
 
     private static JsonElement send(String path, JsonObject requestObject) throws IllegalAccessException, IOException, InterruptedException {

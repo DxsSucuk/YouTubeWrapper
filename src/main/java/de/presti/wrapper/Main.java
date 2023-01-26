@@ -9,7 +9,7 @@ import java.net.http.HttpResponse;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        YouTubeWrapper.getChannelVideo("UCg9sQ_VRxgLKCSpuAeqaIBQ").getVideos().forEach(c -> System.out.println(c.getTitle() + " - " + c.getId()));
+
     }
 
     public void testStuff() throws Exception {

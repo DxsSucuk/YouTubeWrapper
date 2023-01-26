@@ -40,7 +40,7 @@ public class ChannelVideoResult extends ChannelResult {
             JsonObject currentVideoObject = videoContent.get(i).getAsJsonObject().getAsJsonObject("richItemRenderer")
                     .getAsJsonObject("content").getAsJsonObject("videoRenderer");
 
-            videos.add(new VideoResult(currentVideoObject));
+            videos.add(new VideoResult(currentVideoObject, true));
         }
     }
 }
