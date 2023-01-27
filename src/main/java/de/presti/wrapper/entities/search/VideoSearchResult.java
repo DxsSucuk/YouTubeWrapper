@@ -22,7 +22,7 @@ public class VideoSearchResult extends SearchResult {
                 .getAsJsonObject("navigationEndpoint").getAsJsonObject("browseEndpoint")
                 .getAsJsonPrimitive("browseId").getAsString();
         
-        if (jsonObject.has("viewCountText")) {
+        if (jsonObject.has("viewCountText") && jsonObject.getAsJsonObject("viewCountText").has("simpleText")) {
             viewCountText = jsonObject.getAsJsonObject("viewCountText").getAsJsonPrimitive("simpleText").getAsString();
         }
     }
