@@ -37,10 +37,19 @@ public class ChannelVideoResult extends ChannelResult {
         }
 
         for (int i = 0; i < videoContent.size(); i++) {
-            JsonObject currentVideoObject = videoContent.get(i).getAsJsonObject().getAsJsonObject("richItemRenderer")
-                    .getAsJsonObject("content").getAsJsonObject("videoRenderer");
+            JsonObject currentVideoObject = videoContent.get(i).getAsJsonObject();
+            if (currentVideoObject == null) continue;
 
-            videos.add(new VideoResult(currentVideoObject, true));
+            if (currentVideoObject.has("richItemRenderer")) {
+                currentVideoObject = currentVideoObject
+                        .getAsJsonObject("richItemRenderer");
+                if (currentVideoObject.has("content")) {
+                    currentVideoObject = currentVideoObject
+                            .getAsJsonObject("content")
+                            .getAsJsonObject("videoRenderer");
+                    videos.add(new VideoResult(currentVideoObject, true));
+                }
+            }
         }
     }
 }

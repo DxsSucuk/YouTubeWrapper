@@ -1,4 +1,5 @@
 import com.google.gson.*;
+import de.presti.wrapper.YouTubeWrapper;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -7,7 +8,7 @@ import java.net.http.HttpResponse;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-
+        YouTubeWrapper.getChannelVideo("UCXuqSBlHAE6Xw-yeJA0Tunw");
     }
 
     public void testStuff() throws Exception {
