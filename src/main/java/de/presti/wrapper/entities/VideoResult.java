@@ -38,7 +38,7 @@ public class VideoResult {
             }
         } else {
             uploadDate = jsonObject.getAsJsonObject("streamingData").getAsJsonArray("formats").get(0)
-                    .getAsJsonObject().getAsJsonPrimitive("lastModified").getAsLong();
+                    .getAsJsonObject().getAsJsonPrimitive("lastModified").getAsLong() / 1000;
             JsonObject videoDetails = jsonObject.getAsJsonObject("videoDetails");
             ownerId = videoDetails.getAsJsonPrimitive("channelId").getAsString();
             ownerName = videoDetails.getAsJsonPrimitive("author").getAsString();
