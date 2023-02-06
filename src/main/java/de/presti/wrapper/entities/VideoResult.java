@@ -11,6 +11,7 @@ public class VideoResult {
 
     String id;
     String ownerId;
+    String ownerName;
     String title;
     String thumbnail;
     String durationText;
@@ -40,6 +41,7 @@ public class VideoResult {
                     .getAsJsonObject().getAsJsonPrimitive("lastModified").getAsLong();
             JsonObject videoDetails = jsonObject.getAsJsonObject("videoDetails");
             ownerId = videoDetails.getAsJsonPrimitive("channelId").getAsString();
+            ownerName = videoDetails.getAsJsonPrimitive("author").getAsString();
             id = videoDetails.getAsJsonPrimitive("videoId").getAsString();
             title = videoDetails.getAsJsonPrimitive("title").getAsString();
 
