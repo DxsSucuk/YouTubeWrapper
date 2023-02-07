@@ -4,6 +4,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import lombok.Getter;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 // TODO:: find a way to get the upload date in a nice format.
 
 @Getter
@@ -20,6 +24,8 @@ public class VideoResult {
     boolean live;
     long lengthSeconds;
     long uploadDate = -1;
+
+    Date actualUploadDate;
 
     public VideoResult(JsonObject jsonObject, boolean importFromChannel, boolean importFromShort) {
         if (importFromChannel) {
@@ -43,8 +49,15 @@ public class VideoResult {
                 }
             }
         } else {
-            uploadDate = jsonObject.getAsJsonObject("streamingData").getAsJsonArray("formats").get(0)
+            JsonArray formats = jsonObject.getAsJsonObject("streamingData").getAsJsonArray("formats");
+            uploadDate = formats.get(formats.size() -1)
                     .getAsJsonObject().getAsJsonPrimitive("lastModified").getAsLong() / 1000;
+
+            try {
+                actualUploadDate = new SimpleDateFormat("yyyy-mm-dd").parse(jsonObject.getAsJsonObject("microformat")
+                        .getAsJsonObject("playerMicroformatRenderer").getAsJsonPrimitive("uploadDate").getAsString());
+            } catch (ParseException ignore) {}
+
             JsonObject videoDetails = jsonObject.getAsJsonObject("videoDetails");
             ownerId = videoDetails.getAsJsonPrimitive("channelId").getAsString();
             ownerName = videoDetails.getAsJsonPrimitive("author").getAsString();
