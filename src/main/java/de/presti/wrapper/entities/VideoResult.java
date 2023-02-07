@@ -21,20 +21,26 @@ public class VideoResult {
     long lengthSeconds;
     long uploadDate = -1;
 
-    public VideoResult(JsonObject jsonObject, boolean importFromChannel) {
+    public VideoResult(JsonObject jsonObject, boolean importFromChannel, boolean importFromShort) {
         if (importFromChannel) {
             id = jsonObject.getAsJsonPrimitive("videoId").getAsString();
             JsonArray thumbnailArray = jsonObject.getAsJsonObject("thumbnail").getAsJsonArray("thumbnails");
             thumbnail = thumbnailArray.get(thumbnailArray.size() - 1).getAsJsonObject()
                     .getAsJsonPrimitive("url").getAsString();
-            title = jsonObject.getAsJsonObject("title").getAsJsonArray("runs").get(0).getAsJsonObject()
-                    .getAsJsonPrimitive("text").getAsString();
-            durationText = jsonObject.getAsJsonObject("lengthText").getAsJsonPrimitive("simpleText").getAsString();
             viewCountText = jsonObject.getAsJsonObject("viewCountText").getAsJsonPrimitive("simpleText").getAsString();
 
-            if (jsonObject.has("descriptionSnippet")) {
-                descriptionSnippet = jsonObject.getAsJsonObject("descriptionSnippet").getAsJsonArray("runs").get(0).getAsJsonObject()
+            if (importFromShort) {
+                title = jsonObject.getAsJsonObject("headline").getAsJsonPrimitive("simpleText").getAsString();
+            } else {
+                title = jsonObject.getAsJsonObject("title").getAsJsonArray("runs").get(0).getAsJsonObject()
                         .getAsJsonPrimitive("text").getAsString();
+                durationText = jsonObject.getAsJsonObject("lengthText").getAsJsonPrimitive("simpleText").getAsString();
+                viewCountText = jsonObject.getAsJsonObject("viewCountText").getAsJsonPrimitive("simpleText").getAsString();
+
+                if (jsonObject.has("descriptionSnippet")) {
+                    descriptionSnippet = jsonObject.getAsJsonObject("descriptionSnippet").getAsJsonArray("runs").get(0).getAsJsonObject()
+                            .getAsJsonPrimitive("text").getAsString();
+                }
             }
         } else {
             uploadDate = jsonObject.getAsJsonObject("streamingData").getAsJsonArray("formats").get(0)

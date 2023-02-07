@@ -88,11 +88,21 @@ public class YouTubeWrapper {
         return new ChannelVideoResult(send("/browse", jsonObject).getAsJsonObject());
     }
 
-    public static VideoResult getVideo(String videoId) throws IllegalAccessException, IOException, InterruptedException {
+    public ChannelVideoResult getChannelShort(String channelId) throws IllegalAccessException, IOException, InterruptedException {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("browseId", channelId);
+        jsonObject.addProperty("params", "EgZzaG9ydHPyBgUKA5oBAA%3D%3D");
+
+        return new ChannelVideoResult(send("/browse", jsonObject).getAsJsonObject());
+    }
+
+    public static VideoResult getVideo(String videoId, boolean isShort) throws IllegalAccessException, IOException, InterruptedException {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("videoId", videoId);
+        if (isShort)
+            jsonObject.addProperty("params", "8AEByAMkuAQ0");
 
-        return new VideoResult(send("/player", jsonObject).getAsJsonObject(), false);
+        return new VideoResult(send("/player", jsonObject).getAsJsonObject(), false, false);
     }
 
     private static JsonElement send(String path, JsonObject requestObject) throws IllegalAccessException, IOException, InterruptedException {
