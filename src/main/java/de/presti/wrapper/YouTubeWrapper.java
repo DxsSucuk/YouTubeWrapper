@@ -3,6 +3,7 @@ package de.presti.wrapper;
 import com.google.gson.*;
 import de.presti.wrapper.entities.VideoResult;
 import de.presti.wrapper.entities.channel.ChannelResult;
+import de.presti.wrapper.entities.channel.ChannelShortResult;
 import de.presti.wrapper.entities.channel.ChannelVideoResult;
 import de.presti.wrapper.entities.search.ChannelSearchResult;
 import de.presti.wrapper.entities.search.SearchResult;
@@ -88,12 +89,12 @@ public class YouTubeWrapper {
         return new ChannelVideoResult(send("/browse", jsonObject).getAsJsonObject());
     }
 
-    public ChannelVideoResult getChannelShort(String channelId) throws IllegalAccessException, IOException, InterruptedException {
+    public static ChannelShortResult getChannelShort(String channelId) throws IllegalAccessException, IOException, InterruptedException {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("browseId", channelId);
         jsonObject.addProperty("params", "EgZzaG9ydHPyBgUKA5oBAA%3D%3D");
 
-        return new ChannelVideoResult(send("/browse", jsonObject).getAsJsonObject());
+        return new ChannelShortResult(send("/browse", jsonObject).getAsJsonObject());
     }
 
     public static VideoResult getVideo(String videoId, boolean isShort) throws IllegalAccessException, IOException, InterruptedException {

@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ChannelShortResult extends ChannelResult {
 
-    List<VideoResult> videos = new ArrayList<>();
+    List<VideoResult> shorts = new ArrayList<>();
 
     public ChannelShortResult(JsonObject jsonObject) {
         super(jsonObject);
@@ -45,7 +45,7 @@ public class ChannelShortResult extends ChannelResult {
                     currentVideoObject = currentVideoObject
                             .getAsJsonObject("content")
                             .getAsJsonObject("reelItemRenderer");
-                    videos.add(new VideoResult(currentVideoObject, true, true));
+                    shorts.add(new VideoResult(currentVideoObject, true, true));
                 }
             }
         }
