@@ -3,10 +3,12 @@ package de.presti.wrapper.entities.channel;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.presti.wrapper.entities.VideoResult;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class ChannelShortResult extends ChannelResult {
 
     List<VideoResult> shorts = new ArrayList<>();
