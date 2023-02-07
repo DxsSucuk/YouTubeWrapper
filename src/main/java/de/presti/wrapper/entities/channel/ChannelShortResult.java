@@ -7,11 +7,11 @@ import de.presti.wrapper.entities.VideoResult;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChannelSortResult extends ChannelResult {
+public class ChannelShortResult extends ChannelResult {
 
     List<VideoResult> videos = new ArrayList<>();
 
-    public ChannelSortResult(JsonObject jsonObject) {
+    public ChannelShortResult(JsonObject jsonObject) {
         super(jsonObject);
 
         JsonArray tabs = jsonObject.getAsJsonObject("contents").getAsJsonObject("twoColumnBrowseResultsRenderer").getAsJsonArray("tabs");
