@@ -68,7 +68,9 @@ public class VideoResult {
             thumbnail = thumbnailArray.get(thumbnailArray.size() - 1).getAsJsonObject()
                     .getAsJsonPrimitive("url").getAsString();
 
-            viewCountText = videoDetails.getAsJsonPrimitive("viewCount").getAsString();
+            if (videoDetails.has("viewCount"))
+                viewCountText = videoDetails.getAsJsonPrimitive("viewCount").getAsString();
+
             lengthSeconds = videoDetails.getAsJsonPrimitive("lengthSeconds").getAsLong();
             descriptionSnippet = videoDetails.getAsJsonPrimitive("shortDescription").getAsString();
             live = videoDetails.getAsJsonPrimitive("isLiveContent").getAsBoolean();
