@@ -17,7 +17,9 @@ public class SearchResult {
 
     String ownerId;
 
+    JsonObject internalObject;
     public SearchResult(JsonObject jsonObject) {
+        internalObject = jsonObject;
     }
 
     public enum FILTER {

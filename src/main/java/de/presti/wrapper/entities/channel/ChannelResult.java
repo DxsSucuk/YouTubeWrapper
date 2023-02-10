@@ -20,7 +20,10 @@ public class ChannelResult {
 
     boolean familySafe;
 
+    JsonObject internalObject;
+    
     public ChannelResult(JsonObject jsonObject) {
+        internalObject = jsonObject;
         subscriberCountText = jsonObject.getAsJsonObject("header")
                 .getAsJsonObject("c4TabbedHeaderRenderer").getAsJsonObject("subscriberCountText")
                 .getAsJsonPrimitive("simpleText").getAsString();

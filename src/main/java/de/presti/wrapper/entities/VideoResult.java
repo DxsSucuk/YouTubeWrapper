@@ -24,10 +24,11 @@ public class VideoResult {
     boolean live;
     long lengthSeconds;
     long uploadDate = -1;
-
     Date actualUploadDate;
+    JsonObject internalObject;
 
     public VideoResult(JsonObject jsonObject, boolean importFromChannel, boolean importFromShort) {
+        internalObject = jsonObject;
         if (importFromChannel) {
             id = jsonObject.getAsJsonPrimitive("videoId").getAsString();
             JsonArray thumbnailArray = jsonObject.getAsJsonObject("thumbnail").getAsJsonArray("thumbnails");
@@ -50,7 +51,9 @@ public class VideoResult {
             }
         } else {
             JsonArray formats = jsonObject.getAsJsonObject("streamingData").getAsJsonArray("formats");
-            uploadDate = formats.get(formats.size() -1)
+
+            if (formats != null)
+                uploadDate = formats.get(formats.size() -1)
                     .getAsJsonObject().getAsJsonPrimitive("lastModified").getAsLong() / 1000;
 
             try {
