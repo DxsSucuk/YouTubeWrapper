@@ -3,6 +3,7 @@ package de.presti.wrapper.entities;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,6 +12,7 @@ import java.util.Date;
 // TODO:: find a way to get the upload date in a nice format.
 
 @Getter
+@Slf4j
 public class VideoResult {
 
     String id;
@@ -29,6 +31,18 @@ public class VideoResult {
 
     public VideoResult(JsonObject jsonObject, boolean importFromChannel, boolean importFromShort) {
         internalObject = jsonObject;
+
+        if (jsonObject.has("playabilityStatus")) {
+            JsonObject playabilityStatus = jsonObject.getAsJsonObject("playabilityStatus");
+            if (playabilityStatus.has("status")) {
+                if (playabilityStatus.getAsJsonPrimitive("status").getAsString().equalsIgnoreCase("error")) {
+                    String errorCode = playabilityStatus.getAsJsonPrimitive("reason").getAsString();
+                    log.error("Couldn't get video info! Reason: " + errorCode);
+                    return;
+                }
+            }
+        }
+
         try {
             if (importFromChannel) {
                 id = jsonObject.getAsJsonPrimitive("videoId").getAsString();
