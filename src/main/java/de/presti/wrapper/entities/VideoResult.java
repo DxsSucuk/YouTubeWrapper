@@ -32,6 +32,11 @@ public class VideoResult {
     public VideoResult(JsonObject jsonObject, boolean importFromChannel, boolean importFromShort) {
         internalObject = jsonObject;
 
+        if (internalObject.has("failed") && internalObject.getAsJsonPrimitive("failed").getAsBoolean()) {
+            log.error("Couldn't get video info! Reason: Failed sending a request");
+            return;
+        }
+
         if (jsonObject.has("playabilityStatus")) {
             JsonObject playabilityStatus = jsonObject.getAsJsonObject("playabilityStatus");
             if (playabilityStatus.has("status")) {

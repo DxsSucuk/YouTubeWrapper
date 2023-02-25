@@ -10,14 +10,14 @@ import de.presti.wrapper.entities.search.SearchResult;
 import de.presti.wrapper.entities.search.VideoSearchResult;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -39,6 +39,8 @@ public class YouTubeWrapper {
             "AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w",
             "AIzaSyCjc_pVEDi4qsv5MtC2dMXzpIaDoRFLsxw"
     };
+
+    public static Map<String, Long> actionRetries = new HashMap<>();
 
     public static JsonObject CONTEXT;
 
@@ -107,6 +109,10 @@ public class YouTubeWrapper {
     }
 
     private static JsonElement send(String path, JsonObject requestObject) throws IllegalAccessException, IOException, InterruptedException {
+        return send(path, requestObject, getRandomId(8));
+    }
+
+    private static JsonElement send(String path, JsonObject requestObject, String callId) throws IllegalAccessException, IOException, InterruptedException {
 
         if (CONTEXT == null) {
             CONTEXT = createContext();
@@ -120,20 +126,33 @@ public class YouTubeWrapper {
                 .uri(URI.create(BASE_URL + path + "?key=" + currentKey + "&prettyPrint=true"))
                 .POST(HttpRequest.BodyPublishers.ofString(requestObject.toString())).build();
 
-        HttpResponse<String> httpResponse = HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
+        try {
+            HttpResponse<String> httpResponse = HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
-        JsonElement jsonElement = JsonParser.parseString(httpResponse.body());
+            JsonElement jsonElement = JsonParser.parseString(httpResponse.body());
 
-        if (jsonElement.getAsJsonObject().has("error")) {
-            if (jsonElement.getAsJsonObject()
-                    .getAsJsonObject("error").getAsJsonPrimitive("code").getAsInt() == 403) {
-                throw new IllegalAccessException("Invalid API key: " + currentKey);
+            if (jsonElement.getAsJsonObject().has("error")) {
+                if (jsonElement.getAsJsonObject()
+                        .getAsJsonObject("error").getAsJsonPrimitive("code").getAsInt() == 403) {
+                    throw new IllegalAccessException("Invalid API key: " + currentKey);
+                } else {
+                    throw new IOException("Error while sending request: " + jsonElement);
+                }
+            }
+
+            return jsonElement;
+        } catch (ConnectException connectException) {
+            long tries = (actionRetries.containsKey(callId) ? actionRetries.get(callId) : 0);
+            if (tries >= 3) {
+                JsonObject errorObject = new JsonObject();
+                errorObject.addProperty("failed", true);
+                actionRetries.remove(callId);
+                return errorObject;
             } else {
-                throw new IOException("Error while sending request: " + jsonElement);
+                actionRetries.put(callId, tries + 1);
+                return send(path, requestObject, callId);
             }
         }
-
-        return jsonElement;
     }
 
     private static JsonObject createContext() {
@@ -156,4 +175,21 @@ public class YouTubeWrapper {
         return context;
     }
 
+    /**
+     * Get a String fully of random Number by the given length.
+     *
+     * @param length the wanted Length.
+     * @return the {@link String} with the wanted Length.
+     */
+    public static String getRandomId(int length) {
+        StringBuilder end = new StringBuilder();
+
+        Random random = ThreadLocalRandom.current();
+
+        for (int i = 0; i < length; i++) {
+            end.append(random.nextInt(9));
+        }
+
+        return end.toString();
+    }
 }

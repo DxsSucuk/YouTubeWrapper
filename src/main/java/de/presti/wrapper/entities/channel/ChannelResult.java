@@ -2,7 +2,10 @@ package de.presti.wrapper.entities.channel;
 
 import com.google.gson.JsonObject;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+
+@Slf4j
 @Getter
 public class ChannelResult {
 
@@ -24,6 +27,12 @@ public class ChannelResult {
     
     public ChannelResult(JsonObject jsonObject) {
         internalObject = jsonObject;
+
+        if (internalObject.has("failed") && internalObject.getAsJsonPrimitive("failed").getAsBoolean()) {
+            log.error("Couldn't get video info! Reason: Failed sending a request");
+            return;
+        }
+
         subscriberCountText = jsonObject.getAsJsonObject("header")
                 .getAsJsonObject("c4TabbedHeaderRenderer").getAsJsonObject("subscriberCountText")
                 .getAsJsonPrimitive("simpleText").getAsString();
