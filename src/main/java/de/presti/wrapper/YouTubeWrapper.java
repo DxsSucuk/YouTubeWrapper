@@ -18,6 +18,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -43,6 +46,8 @@ public class YouTubeWrapper {
     public static Map<String, Long> actionRetries = new HashMap<>();
 
     public static JsonObject CONTEXT;
+
+    //region None Future
 
     public static List<SearchResult> search(String query, SearchResult.FILTER filter) throws IllegalAccessException, IOException, InterruptedException {
         List<SearchResult> results = new ArrayList<>();
@@ -154,6 +159,8 @@ public class YouTubeWrapper {
             }
         }
     }
+
+    //endregion
 
     private static JsonObject createContext() {
         JsonObject context = new JsonObject();
