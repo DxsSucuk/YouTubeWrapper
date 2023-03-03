@@ -140,6 +140,18 @@ public class YouTubeWrapper {
                 if (jsonElement.getAsJsonObject()
                         .getAsJsonObject("error").getAsJsonPrimitive("code").getAsInt() == 403) {
                     throw new IllegalAccessException("Invalid API key: " + currentKey);
+                } else if (jsonElement.getAsJsonObject()
+                        .getAsJsonObject("error").getAsJsonPrimitive("code").getAsInt() == 429) {
+                    long tries = (actionRetries.containsKey(callId) ? actionRetries.get(callId) : 0);
+                    if (tries >= 3) {
+                        JsonObject errorObject = new JsonObject();
+                        errorObject.addProperty("failed", true);
+                        actionRetries.remove(callId);
+                        return errorObject;
+                    } else {
+                        actionRetries.put(callId, tries + 1);
+                        return send(path, requestObject, callId);
+                    }
                 } else {
                     throw new IOException("Error while sending request: " + jsonElement);
                 }
