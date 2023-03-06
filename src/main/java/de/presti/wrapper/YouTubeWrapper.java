@@ -133,8 +133,13 @@ public class YouTubeWrapper {
 
         try {
             HttpResponse<String> httpResponse = HttpClient.newHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
-
-            JsonElement jsonElement = JsonParser.parseString(httpResponse.body());
+            JsonElement jsonElement;
+            String responseBody = httpResponse.body();
+            try {
+                jsonElement = JsonParser.parseString(responseBody);
+            } catch (Exception exception) {
+                throw new IOException("Invalid JSONElement: " + responseBody);
+            }
 
             if (jsonElement.getAsJsonObject().has("error")) {
                 if (jsonElement.getAsJsonObject()
@@ -143,6 +148,7 @@ public class YouTubeWrapper {
                 } else if (jsonElement.getAsJsonObject()
                         .getAsJsonObject("error").getAsJsonPrimitive("code").getAsInt() == 429) {
                     long tries = (actionRetries.containsKey(callId) ? actionRetries.get(callId) : 0);
+
                     if (tries >= 3) {
                         JsonObject errorObject = new JsonObject();
                         errorObject.addProperty("failed", true);
@@ -160,6 +166,7 @@ public class YouTubeWrapper {
             return jsonElement;
         } catch (ConnectException connectException) {
             long tries = (actionRetries.containsKey(callId) ? actionRetries.get(callId) : 0);
+
             if (tries >= 3) {
                 JsonObject errorObject = new JsonObject();
                 errorObject.addProperty("failed", true);
