@@ -142,11 +142,11 @@ public class YouTubeWrapper {
             }
 
             if (jsonElement.getAsJsonObject().has("error")) {
-                if (jsonElement.getAsJsonObject()
-                        .getAsJsonObject("error").getAsJsonPrimitive("code").getAsInt() == 403) {
+                int errorCode = jsonElement.getAsJsonObject()
+                        .getAsJsonObject("error").getAsJsonPrimitive("code").getAsInt();
+                if (errorCode == 403) {
                     throw new IllegalAccessException("Invalid API key: " + currentKey);
-                } else if (jsonElement.getAsJsonObject()
-                        .getAsJsonObject("error").getAsJsonPrimitive("code").getAsInt() == 429) {
+                } else if (errorCode == 429 || (errorCode >= 500 && errorCode <= 599)) {
                     long tries = (actionRetries.containsKey(callId) ? actionRetries.get(callId) : 0);
 
                     if (tries >= 3) {
