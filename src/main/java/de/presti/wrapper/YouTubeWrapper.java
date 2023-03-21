@@ -34,8 +34,14 @@ public class YouTubeWrapper {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
+    /**
+     * The base URL to the InnerTube API.
+     */
     public static String BASE_URL = "https://www.youtube.com/youtubei/v1";
 
+    /**
+     * All public InnerTube Tokens
+     */
     public static String[] KEYS = new String[]{
             "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
             "AIzaSyCtkvNIR1HCEwzsqK6JuE6KqpyjusIRI30",
@@ -43,12 +49,27 @@ public class YouTubeWrapper {
             "AIzaSyCjc_pVEDi4qsv5MtC2dMXzpIaDoRFLsxw"
     };
 
+    /**
+     * Hashmap containing a CallId and its retries.
+     */
     public static Map<String, Long> actionRetries = new HashMap<>();
 
+    /**
+     * Pre-generated Context JSON for api calls.
+     */
     public static JsonObject CONTEXT;
 
     //region None Future
 
+    /**
+     * Search for something based on the query and filter on YouTube.
+     * @param query The Query String.
+     * @param filter the {@link SearchResult.FILTER}.
+     * @return a List of {@link SearchResult}.
+     * @throws IllegalAccessException If a API-Token is invalid.
+     * @throws IOException If there was an error while trying to process the request.
+     * @throws InterruptedException If the HTTP request was interrupted.
+     */
     public static List<SearchResult> search(String query, SearchResult.FILTER filter) throws IllegalAccessException, IOException, InterruptedException {
         List<SearchResult> results = new ArrayList<>();
         query = URLEncoder.encode(query, StandardCharsets.UTF_8);
@@ -81,6 +102,14 @@ public class YouTubeWrapper {
         return results;
     }
 
+    /**
+     * The a channel via its ID.
+     * @param channelId The ID of the channel.
+     * @return a {@link ChannelResult}
+     * @throws IllegalAccessException If a API-Token is invalid.
+     * @throws IOException If there was an error while trying to process the request.
+     * @throws InterruptedException If the HTTP request was interrupted.
+     */
     public static ChannelResult getChannel(String channelId) throws IllegalAccessException, IOException, InterruptedException {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("browseId", channelId);
@@ -88,6 +117,14 @@ public class YouTubeWrapper {
         return new ChannelResult(send("/browse", jsonObject).getAsJsonObject());
     }
 
+    /**
+     * Get all the videos of a channel via its ID.
+     * @param channelId The ID of the channel.
+     * @return a {@link ChannelVideoResult}
+     * @throws IllegalAccessException If a API-Token is invalid.
+     * @throws IOException If there was an error while trying to process the request.
+     * @throws InterruptedException If the HTTP request was interrupted.
+     */
     public static ChannelVideoResult getChannelVideo(String channelId) throws IllegalAccessException, IOException, InterruptedException {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("browseId", channelId);
@@ -96,6 +133,14 @@ public class YouTubeWrapper {
         return new ChannelVideoResult(send("/browse", jsonObject).getAsJsonObject());
     }
 
+    /**
+     * Get all the shorts of a channel via its ID.
+     * @param channelId The ID of the channel.
+     * @return a {@link ChannelShortResult}
+     * @throws IllegalAccessException If a API-Token is invalid.
+     * @throws IOException If there was an error while trying to process the request.
+     * @throws InterruptedException If the HTTP request was interrupted.
+     */
     public static ChannelShortResult getChannelShort(String channelId) throws IllegalAccessException, IOException, InterruptedException {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("browseId", channelId);
@@ -104,6 +149,15 @@ public class YouTubeWrapper {
         return new ChannelShortResult(send("/browse", jsonObject).getAsJsonObject());
     }
 
+    /**
+     * Get a video via its ID.
+     * @param videoId The ID of the Video.
+     * @param isShort If the video is a short or not.
+     * @return a {@link VideoResult}
+     * @throws IllegalAccessException If a API-Token is invalid.
+     * @throws IOException If there was an error while trying to process the request.
+     * @throws InterruptedException If the HTTP request was interrupted.
+     */
     public static VideoResult getVideo(String videoId, boolean isShort) throws IllegalAccessException, IOException, InterruptedException {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("videoId", videoId);
@@ -113,10 +167,29 @@ public class YouTubeWrapper {
         return new VideoResult(send("/player", jsonObject).getAsJsonObject(), false, false);
     }
 
+    /**
+     * Method to send request to the InnerTube API without manually doing anything related to API Issues or context creation.
+     * @param path The URL path.
+     * @param requestObject The extra request Object.
+     * @return a {@link JsonElement} responds from the InnerTube API.
+     * @throws IllegalAccessException If a API-Token is invalid.
+     * @throws IOException If there was an error while trying to process the request.
+     * @throws InterruptedException If the HTTP request was interrupted.
+     */
     private static JsonElement send(String path, JsonObject requestObject) throws IllegalAccessException, IOException, InterruptedException {
         return send(path, requestObject, getRandomId(8));
     }
 
+    /**
+     * Method to send request to the InnerTube API without manually doing anything related to API Issues or context creation.
+     * @param path The URL path.
+     * @param requestObject The extra request Object.
+     * @param callId Its call ID to use for retries.
+     * @return a {@link JsonElement} responds from the InnerTube API.
+     * @throws IllegalAccessException If a API-Token is invalid.
+     * @throws IOException If there was an error while trying to process the request.
+     * @throws InterruptedException If the HTTP request was interrupted.
+     */
     private static JsonElement send(String path, JsonObject requestObject, String callId) throws IllegalAccessException, IOException, InterruptedException {
 
         if (CONTEXT == null) {
@@ -138,6 +211,11 @@ public class YouTubeWrapper {
             try {
                 jsonElement = JsonParser.parseString(responseBody);
             } catch (Exception exception) {
+                String trimmedBody = responseBody.trim().toLowerCase();
+                if (trimmedBody.startsWith("<!doctype html>") && trimmedBody.contains("<title>error 5")) {
+                    return retryAction(callId, path, requestObject);
+                }
+
                 throw new IOException("Invalid JSONElement: " + responseBody);
             }
 
@@ -147,17 +225,7 @@ public class YouTubeWrapper {
                 if (errorCode == 403) {
                     throw new IllegalAccessException("Invalid API key: " + currentKey);
                 } else if (errorCode == 429 || (errorCode >= 500 && errorCode <= 599)) {
-                    long tries = (actionRetries.containsKey(callId) ? actionRetries.get(callId) : 0);
-
-                    if (tries >= 3) {
-                        JsonObject errorObject = new JsonObject();
-                        errorObject.addProperty("failed", true);
-                        actionRetries.remove(callId);
-                        return errorObject;
-                    } else {
-                        actionRetries.put(callId, tries + 1);
-                        return send(path, requestObject, callId);
-                    }
+                    return retryAction(callId, path, requestObject);
                 } else {
                     throw new IOException("Error while sending request: " + jsonElement);
                 }
@@ -165,21 +233,25 @@ public class YouTubeWrapper {
 
             return jsonElement;
         } catch (ConnectException connectException) {
-            long tries = (actionRetries.containsKey(callId) ? actionRetries.get(callId) : 0);
-
-            if (tries >= 3) {
-                JsonObject errorObject = new JsonObject();
-                errorObject.addProperty("failed", true);
-                actionRetries.remove(callId);
-                return errorObject;
-            } else {
-                actionRetries.put(callId, tries + 1);
-                return send(path, requestObject, callId);
-            }
+            return retryAction(callId, path, requestObject);
         }
     }
 
     //endregion
+
+    private static JsonElement retryAction(String callId, String path, JsonObject requestObject) throws IOException, InterruptedException, IllegalAccessException {
+        long tries = (actionRetries.containsKey(callId) ? actionRetries.get(callId) : 0);
+
+        if (tries >= 3) {
+            JsonObject errorObject = new JsonObject();
+            errorObject.addProperty("failed", true);
+            actionRetries.remove(callId);
+            return errorObject;
+        } else {
+            actionRetries.put(callId, tries + 1);
+            return send(path, requestObject, callId);
+        }
+    }
 
     private static JsonObject createContext() {
         JsonObject context = new JsonObject();
