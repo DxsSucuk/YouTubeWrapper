@@ -77,7 +77,7 @@ public class VideoResult {
                             .getAsJsonObject().getAsJsonPrimitive("lastModified").getAsLong() / 1000;
 
                 try {
-                    actualUploadDate = new SimpleDateFormat("yyyy-mm-dd").parse(jsonObject.getAsJsonObject("microformat")
+                    actualUploadDate = new SimpleDateFormat("yyyy-MM-dd").parse(jsonObject.getAsJsonObject("microformat")
                             .getAsJsonObject("playerMicroformatRenderer").getAsJsonPrimitive("uploadDate").getAsString());
                 } catch (ParseException ignore) {
                 }
