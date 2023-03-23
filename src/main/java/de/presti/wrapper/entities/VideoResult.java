@@ -2,6 +2,8 @@ package de.presti.wrapper.entities;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import io.sentry.Sentry;
+import io.sentry.SentryEvent;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -100,7 +102,13 @@ public class VideoResult {
                 live = videoDetails.getAsJsonPrimitive("isLiveContent").getAsBoolean();
             }
         } catch (Exception exception) {
-            throw new NullPointerException(exception.getMessage() + "\nInternal Object: " + internalObject);
+            if (Sentry.isEnabled()) {
+                SentryEvent event = new SentryEvent(exception);
+                event.setExtra("internalObject", internalObject.toString());
+                Sentry.captureEvent(event);
+            } else {
+                throw new NullPointerException(exception.getMessage() + "\nInternal Object: " + internalObject);
+            }
         }
     }
 
