@@ -8,6 +8,8 @@ import de.presti.wrapper.entities.channel.ChannelVideoResult;
 import de.presti.wrapper.entities.search.ChannelSearchResult;
 import de.presti.wrapper.entities.search.SearchResult;
 import de.presti.wrapper.entities.search.VideoSearchResult;
+import io.sentry.Sentry;
+import io.sentry.SentryEvent;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -83,20 +85,28 @@ public class YouTubeWrapper {
 
         JsonElement jsonElement = send("/search", jsonObject);
 
-        JsonArray actualContent = jsonElement.getAsJsonObject().getAsJsonObject("contents")
-                .getAsJsonObject("twoColumnSearchResultsRenderer").getAsJsonObject("primaryContents")
-                .getAsJsonObject("sectionListRenderer").getAsJsonArray("contents").get(0).getAsJsonObject()
-                .getAsJsonObject("itemSectionRenderer").getAsJsonArray("contents");
+        try {
+            JsonArray actualContent = jsonElement.getAsJsonObject().getAsJsonObject("contents")
+                    .getAsJsonObject("twoColumnSearchResultsRenderer").getAsJsonObject("primaryContents")
+                    .getAsJsonObject("sectionListRenderer").getAsJsonArray("contents").get(0).getAsJsonObject()
+                    .getAsJsonObject("itemSectionRenderer").getAsJsonArray("contents");
 
-        for (int i = 0; i < actualContent.size(); i++) {
-            JsonObject result = actualContent.get(i).getAsJsonObject();
-            if (result.has("videoRenderer")) {
-                VideoSearchResult videoSearchResult = new VideoSearchResult(result.getAsJsonObject("videoRenderer"));
-                results.add(videoSearchResult);
-            } else if (result.has("channelRenderer")) {
-                ChannelSearchResult channelSearchResult = new ChannelSearchResult(result.getAsJsonObject("channelRenderer"));
-                results.add(channelSearchResult);
+            for (int i = 0; i < actualContent.size(); i++) {
+                JsonObject result = actualContent.get(i).getAsJsonObject();
+                if (result.has("videoRenderer")) {
+                    VideoSearchResult videoSearchResult = new VideoSearchResult(result.getAsJsonObject("videoRenderer"));
+                    results.add(videoSearchResult);
+                } else if (result.has("channelRenderer")) {
+                    ChannelSearchResult channelSearchResult = new ChannelSearchResult(result.getAsJsonObject("channelRenderer"));
+                    results.add(channelSearchResult);
+                }
             }
+
+        } catch (Exception exception) {
+            SentryEvent event = new SentryEvent(exception);
+            event.setExtra("internalObject", jsonElement.toString());
+            Sentry.captureEvent(event);
+            throw exception;
         }
 
         return results;
