@@ -94,10 +94,12 @@ public class YouTubeWrapper {
             for (int i = 0; i < actualContent.size(); i++) {
                 JsonObject result = actualContent.get(i).getAsJsonObject();
                 if (result.has("videoRenderer")) {
-                    VideoSearchResult videoSearchResult = new VideoSearchResult(result.getAsJsonObject("videoRenderer"));
+                    jsonElement = result.getAsJsonObject("videoRenderer");
+                    VideoSearchResult videoSearchResult = new VideoSearchResult(jsonElement.getAsJsonObject());
                     results.add(videoSearchResult);
                 } else if (result.has("channelRenderer")) {
-                    ChannelSearchResult channelSearchResult = new ChannelSearchResult(result.getAsJsonObject("channelRenderer"));
+                    jsonElement = result.getAsJsonObject("channelRenderer");
+                    ChannelSearchResult channelSearchResult = new ChannelSearchResult(jsonElement.getAsJsonObject());
                     results.add(channelSearchResult);
                 }
             }

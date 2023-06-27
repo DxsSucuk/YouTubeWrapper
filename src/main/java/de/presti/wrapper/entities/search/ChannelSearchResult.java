@@ -16,7 +16,9 @@ public class ChannelSearchResult extends SearchResult {
         title = jsonObject.getAsJsonObject("title").getAsJsonPrimitive("simpleText").getAsString();
         id = jsonObject.getAsJsonPrimitive("channelId").getAsString();
         ownerId = id;
-        subscriberCountText = jsonObject.getAsJsonObject("videoCountText").getAsJsonPrimitive("simpleText").getAsString();
+        subscriberCountText =
+                jsonObject.has("videoCountText") ? jsonObject.getAsJsonObject("videoCountText")
+                        .getAsJsonPrimitive("simpleText").getAsString() : "0";
     }
 
     public long getSubscriber() {
