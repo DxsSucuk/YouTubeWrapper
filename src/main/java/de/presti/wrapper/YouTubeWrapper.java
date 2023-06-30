@@ -123,10 +123,21 @@ public class YouTubeWrapper {
      * @throws InterruptedException If the HTTP request was interrupted.
      */
     public static ChannelResult getChannel(String channelId) throws IllegalAccessException, IOException, InterruptedException {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("browseId", channelId);
+        JsonObject internalObject = new JsonObject();
 
-        return new ChannelResult(send("/browse", jsonObject).getAsJsonObject());
+        try {
+            JsonObject sendInfoObject = new JsonObject();
+            sendInfoObject.addProperty("browseId", channelId);
+
+            internalObject = send("/browse", sendInfoObject).getAsJsonObject();
+
+            return new ChannelResult(internalObject.getAsJsonObject());
+        } catch (Exception exception) {
+            SentryEvent event = new SentryEvent(exception);
+            event.setExtra("internalObject", internalObject.toString());
+            Sentry.captureEvent(event);
+            throw exception;
+        }
     }
 
     /**
@@ -138,11 +149,21 @@ public class YouTubeWrapper {
      * @throws InterruptedException If the HTTP request was interrupted.
      */
     public static ChannelVideoResult getChannelVideo(String channelId) throws IllegalAccessException, IOException, InterruptedException {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("browseId", channelId);
-        jsonObject.addProperty("params", "EgZ2aWRlb3PyBgQKAjoA");
+        JsonObject internalObject = new JsonObject();
+        try {
+            JsonObject sendInfoObject = new JsonObject();
+            sendInfoObject.addProperty("browseId", channelId);
+            sendInfoObject.addProperty("params", "EgZ2aWRlb3PyBgQKAjoA");
 
-        return new ChannelVideoResult(send("/browse", jsonObject).getAsJsonObject());
+            internalObject = send("/browse", sendInfoObject).getAsJsonObject();
+
+            return new ChannelVideoResult(internalObject.getAsJsonObject());
+        } catch (Exception exception) {
+            SentryEvent event = new SentryEvent(exception);
+            event.setExtra("internalObject", internalObject.toString());
+            Sentry.captureEvent(event);
+            throw exception;
+        }
     }
 
     /**
@@ -154,11 +175,22 @@ public class YouTubeWrapper {
      * @throws InterruptedException If the HTTP request was interrupted.
      */
     public static ChannelShortResult getChannelShort(String channelId) throws IllegalAccessException, IOException, InterruptedException {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("browseId", channelId);
-        jsonObject.addProperty("params", "EgZzaG9ydHPyBgUKA5oBAA%3D%3D");
+        JsonObject internalObject = new JsonObject();
 
-        return new ChannelShortResult(send("/browse", jsonObject).getAsJsonObject());
+        try {
+            JsonObject sendInfoObject = new JsonObject();
+            sendInfoObject.addProperty("browseId", channelId);
+            sendInfoObject.addProperty("params", "EgZzaG9ydHPyBgUKA5oBAA%3D%3D");
+
+            internalObject = send("/browse", sendInfoObject).getAsJsonObject();
+
+            return new ChannelShortResult(internalObject.getAsJsonObject());
+        } catch (Exception exception) {
+            SentryEvent event = new SentryEvent(exception);
+            event.setExtra("internalObject", internalObject.toString());
+            Sentry.captureEvent(event);
+            throw exception;
+        }
     }
 
     /**
@@ -171,12 +203,24 @@ public class YouTubeWrapper {
      * @throws InterruptedException If the HTTP request was interrupted.
      */
     public static VideoResult getVideo(String videoId, boolean isShort) throws IllegalAccessException, IOException, InterruptedException {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("videoId", videoId);
-        if (isShort)
-            jsonObject.addProperty("params", "8AEByAMkuAQ0");
+        JsonObject internalObject = new JsonObject();
 
-        return new VideoResult(send("/player", jsonObject).getAsJsonObject(), false, false);
+        try {
+            JsonObject sendInfoObject = new JsonObject();
+            sendInfoObject.addProperty("videoId", videoId);
+
+            if (isShort)
+                sendInfoObject.addProperty("params", "8AEByAMkuAQ0");
+
+            internalObject = send("/player", sendInfoObject).getAsJsonObject();
+
+            return new VideoResult(internalObject.getAsJsonObject(), false, false);
+        } catch (Exception exception) {
+            SentryEvent event = new SentryEvent(exception);
+            event.setExtra("internalObject", internalObject.toString());
+            Sentry.captureEvent(event);
+            throw exception;
+        }
     }
 
     /**
@@ -222,6 +266,74 @@ public class YouTubeWrapper {
             String responseBody = httpResponse.body();
             try {
                 jsonElement = JsonParser.parseString(responseBody);
+                if (jsonElement.isJsonObject()) {
+                    JsonObject jsonObject = jsonElement.getAsJsonObject();
+
+                    // Remove useless information.
+
+                    if (jsonObject.has("responseContext")) {
+                        jsonObject.remove("responseContext");
+                    }
+
+                    if (jsonObject.has("topbar")) {
+                        jsonObject.remove("topbar");
+                    }
+
+                    if (jsonObject.has("trackingParams")) {
+                        jsonObject.remove("trackingParams");
+                    }
+
+                    if (jsonObject.has("microformat")) {
+                        JsonObject microformat = jsonObject.getAsJsonObject("microformat");
+
+                        if (microformat.has("microformatDataRenderer")) {
+                            JsonObject microformatRender = microformat.getAsJsonObject("microformatDataRenderer");
+
+                            if (microformatRender.has("availableCountries")) {
+                                microformatRender.remove("availableCountries");
+                            }
+
+                            if (microformatRender.has("linkAlternates")) {
+                                microformatRender.remove("linkAlternates");
+                            }
+
+                            microformat.add("microformatDataRenderer", microformatRender);
+                        }
+
+                        jsonObject.add("microformat", microformat);
+                    }
+
+                    if (jsonObject.has("metadata")) {
+                        JsonObject metadata = jsonObject.getAsJsonObject("metadata");
+
+                        if (metadata.has("channelMetadataRenderer")) {
+                            JsonObject channelMetadataRenderer = metadata.getAsJsonObject("channelMetadataRenderer");
+
+                            if (channelMetadataRenderer.has("availableCountryCodes")) {
+                                channelMetadataRenderer.remove("availableCountryCodes");
+                            }
+
+                            if (channelMetadataRenderer.has("androidAppindexingLink")) {
+                                channelMetadataRenderer.remove("androidAppindexingLink");
+                            }
+
+                            if (channelMetadataRenderer.has("iosAppindexingLink")) {
+                                channelMetadataRenderer.remove("iosAppindexingLink");
+                            }
+
+                            if (channelMetadataRenderer.has("androidDeepLink")) {
+                                channelMetadataRenderer.remove("androidDeepLink");
+                            }
+
+                            metadata.add("channelMetadataRenderer", channelMetadataRenderer);
+                        }
+
+                        jsonObject.add("metadata", metadata);
+                    }
+
+                    jsonElement = jsonObject;
+                }
+                System.out.println(jsonElement);
             } catch (Exception exception) {
                 String trimmedBody = responseBody.trim().toLowerCase();
                 if (trimmedBody.startsWith("<!doctype html>") && trimmedBody.contains("<title>error 5")) {
@@ -251,6 +363,16 @@ public class YouTubeWrapper {
 
     //endregion
 
+    /**
+     * Retry the action if it failed.
+     * @param callId The call ID of the request.
+     * @param path The URL path.
+     * @param requestObject The extra request Object.
+     * @return a {@link JsonElement} responds from the InnerTube API.
+     * @throws IOException If there was an error while trying to process the request.
+     * @throws InterruptedException If the HTTP request was interrupted.
+     * @throws IllegalAccessException If a API-Token is invalid.
+     */
     private static JsonElement retryAction(String callId, String path, JsonObject requestObject) throws IOException, InterruptedException, IllegalAccessException {
         long tries = (actionRetries.containsKey(callId) ? actionRetries.get(callId) : 0);
 
@@ -265,6 +387,10 @@ public class YouTubeWrapper {
         }
     }
 
+    /**
+     * Create a context for the request.
+     * @return a {@link JsonObject} with the context.
+     */
     private static JsonObject createContext() {
         JsonObject context = new JsonObject();
         JsonObject client = new JsonObject();

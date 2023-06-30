@@ -1,13 +1,15 @@
 package de.presti.wrapper.entities.channel;
 
 import com.google.gson.JsonObject;
+import de.presti.wrapper.utils.NumberUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-
 
 @Slf4j
 @Getter
 public class ChannelResult {
+
+    String id;
 
     String title;
 
@@ -16,6 +18,8 @@ public class ChannelResult {
     String channelUrl;
 
     String vanityUrl;
+
+    String rssUrl;
 
     String avatarUrl;
 
@@ -39,10 +43,14 @@ public class ChannelResult {
 
         JsonObject metadata = jsonObject.getAsJsonObject("metadata").getAsJsonObject("channelMetadataRenderer");
 
+        id = metadata.getAsJsonPrimitive("externalId").getAsString();
+
         title = metadata.getAsJsonPrimitive("title").getAsString();
         description = metadata.getAsJsonPrimitive("description").getAsString();
         channelUrl = metadata.getAsJsonPrimitive("channelUrl").getAsString();
         vanityUrl = metadata.getAsJsonPrimitive("vanityChannelUrl").getAsString();
+
+        rssUrl = metadata.getAsJsonPrimitive("rssUrl").getAsString();
 
         avatarUrl = metadata.getAsJsonObject("avatar")
                 .getAsJsonArray("thumbnails").get(0).getAsJsonObject().getAsJsonPrimitive("url").getAsString();
@@ -51,7 +59,7 @@ public class ChannelResult {
     }
 
     public long getSubscriber() {
-        return Long.parseLong(subscriberCountText.replaceAll("[^0-9]", ""));
+        return NumberUtil.extractLong(subscriberCountText);
     }
 
 }

@@ -1,6 +1,7 @@
 package de.presti.wrapper.entities.search;
 
 import com.google.gson.JsonObject;
+import de.presti.wrapper.utils.NumberUtil;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,7 +23,7 @@ public class ChannelSearchResult extends SearchResult {
     }
 
     public long getSubscriber() {
-        return Long.parseLong(subscriberCountText.replaceAll("[^0-9]", ""));
+        return NumberUtil.extractLong(subscriberCountText);
     }
 
 }
