@@ -333,7 +333,6 @@ public class YouTubeWrapper {
 
                     jsonElement = jsonObject;
                 }
-                System.out.println(jsonElement);
             } catch (Exception exception) {
                 String trimmedBody = responseBody.trim().toLowerCase();
                 if (trimmedBody.startsWith("<!doctype html>") && trimmedBody.contains("<title>error 5")) {
