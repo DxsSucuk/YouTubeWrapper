@@ -2,9 +2,11 @@ package de.presti.wrapper.entities;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import de.presti.wrapper.utils.NumberUtil;
 import io.sentry.Sentry;
 import io.sentry.SentryEvent;
 import lombok.Getter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.ParseException;
@@ -13,24 +15,85 @@ import java.util.Date;
 
 // TODO:: find a way to get the upload date in a nice format.
 
+/**
+ * Represents a video result.
+ */
 @Getter
 @Slf4j
+@ToString
 public class VideoResult {
 
+    /**
+     * The id of the video.
+     */
     String id;
+
+    /**
+     * The id of the owner of the video.
+     */
     String ownerId;
+
+    /**
+     * The name of the owner of the video.
+     */
     String ownerName;
+
+    /**
+     * The title of the video.
+     */
     String title;
+
+    /**
+     * The thumbnail of the video.
+     */
     String thumbnail;
+
+    /**
+     * The duration of the video.
+     */
     String durationText;
+
+    /**
+     * The view count text from the video.
+     */
     String viewCountText;
+
+    /**
+     * The description of the video.
+     */
     String descriptionSnippet;
+
+    /**
+     * If the video is live.
+     */
     boolean live;
+
+    /**
+     * The length of the video in seconds.
+     */
     long lengthSeconds;
+
+    /**
+     * The upload date of the video.
+     */
     long uploadDate = -1;
+
+    /**
+     * The actual upload date of the video.
+     */
     Date actualUploadDate;
+
+    /**
+     * The internal json object.
+     */
     JsonObject internalObject;
 
+    /**
+     * Creates a new video result.
+     * @param jsonObject The json object.
+     * @param importFromChannel If the video result should be imported from a channel.
+     * @param importFromShort If the video result should be imported from a short.
+     */
     public VideoResult(JsonObject jsonObject, boolean importFromChannel, boolean importFromShort) {
         internalObject = jsonObject;
 
@@ -112,7 +175,11 @@ public class VideoResult {
         }
     }
 
+    /**
+     * Gets the view count.
+     * @return The view count.
+     */
     public long getViews() {
-        return Long.parseLong(viewCountText.replaceAll("[^0-9]", ""));
+        return NumberUtil.extractLong(viewCountText);
     }
 }

@@ -4,15 +4,27 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.presti.wrapper.entities.VideoResult;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a channel result with videos.
+ */
 @Getter
+@ToString
 public class ChannelVideoResult extends ChannelResult {
 
+    /**
+     * The videos of the channel.
+     */
     List<VideoResult> videos = new ArrayList<>();
 
+    /**
+     * Creates a new channel video result.
+     * @param jsonObject The json object.
+     */
     public ChannelVideoResult(JsonObject jsonObject) {
         super(jsonObject);
 

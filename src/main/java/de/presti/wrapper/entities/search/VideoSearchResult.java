@@ -1,16 +1,29 @@
 package de.presti.wrapper.entities.search;
 
 import com.google.gson.JsonObject;
+import de.presti.wrapper.utils.NumberUtil;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
+/**
+ * Represents a video search result.
+ */
+@ToString
 @Getter(AccessLevel.PUBLIC)
 @AllArgsConstructor
 public class VideoSearchResult extends SearchResult {
 
+    /**
+     * The view count text from the video.
+     */
     String viewCountText;
 
+    /**
+     * Creates a new video search result.
+     * @param jsonObject The json object.
+     */
     public VideoSearchResult(JsonObject jsonObject) {
         super(jsonObject);
         title = jsonObject.getAsJsonObject("title").getAsJsonArray("runs").get(0).getAsJsonObject()
@@ -27,8 +40,12 @@ public class VideoSearchResult extends SearchResult {
         }
     }
 
+    /**
+     * Gets the view count.
+     * @return The view count.
+     */
     public long getViews() {
-        return Long.parseLong(viewCountText.replaceAll("[^0-9]", ""));
+        return NumberUtil.extractLong(viewCountText);
     }
 
 }

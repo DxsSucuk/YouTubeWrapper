@@ -3,32 +3,71 @@ package de.presti.wrapper.entities.channel;
 import com.google.gson.JsonObject;
 import de.presti.wrapper.utils.NumberUtil;
 import lombok.Getter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Represents a channel result.
+ */
 @Slf4j
 @Getter
+@ToString
 public class ChannelResult {
 
+    /**
+     * The id of the channel.
+     */
     String id;
 
+    /**
+     * The title of the channel.
+     */
     String title;
 
+    /**
+     * The description of the channel.
+     */
     String description;
 
+    /**
+     * The url of the channel.
+     */
     String channelUrl;
 
+    /**
+     * The vanity url of the channel.
+     */
     String vanityUrl;
 
+    /**
+     * The rss url of the channel.
+     */
     String rssUrl;
 
+    /**
+     * The avatar url of the channel.
+     */
     String avatarUrl;
 
+    /**
+     * The subscriber count text of the channel.
+     */
     String subscriberCountText;
 
+    /**
+     * If the channel is family safe.
+     */
     boolean familySafe;
 
+    /**
+     * The internal json object.
+     */
     JsonObject internalObject;
-    
+
+    /**
+     * Creates a new channel result.
+     * @param jsonObject The json object.
+     */
     public ChannelResult(JsonObject jsonObject) {
         internalObject = jsonObject;
 
@@ -58,6 +97,10 @@ public class ChannelResult {
         familySafe = metadata.getAsJsonPrimitive("isFamilySafe").getAsBoolean();
     }
 
+    /**
+     * Gets the subscriber count.
+     * @return The subscriber count.
+     */
     public long getSubscriber() {
         return NumberUtil.extractLong(subscriberCountText);
     }

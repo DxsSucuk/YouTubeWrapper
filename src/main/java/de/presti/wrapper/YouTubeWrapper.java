@@ -350,7 +350,7 @@ public class YouTubeWrapper {
                 } else if (errorCode == 429 || (errorCode >= 500 && errorCode <= 599)) {
                     return retryAction(callId, path, requestObject);
                 } else {
-                    throw new IOException("Error while sending request: " + jsonElement);
+                    throw new IOException("Error while sending request (" + errorCode + "): " + jsonElement);
                 }
             }
 

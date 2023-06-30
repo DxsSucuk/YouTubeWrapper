@@ -4,15 +4,27 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.presti.wrapper.entities.VideoResult;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a channel result with shorts.
+ */
 @Getter
+@ToString
 public class ChannelShortResult extends ChannelResult {
 
+    /**
+     * The shorts of the channel.
+     */
     List<VideoResult> shorts = new ArrayList<>();
 
+    /**
+     * Creates a new channel short result.
+     * @param jsonObject The json object.
+     */
     public ChannelShortResult(JsonObject jsonObject) {
         super(jsonObject);
 

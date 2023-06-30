@@ -5,13 +5,25 @@ import de.presti.wrapper.utils.NumberUtil;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 
+/**
+ * Represents a channel search result.
+ */
+@ToString
 @Getter(AccessLevel.PUBLIC)
 @AllArgsConstructor
 public class ChannelSearchResult extends SearchResult {
 
+    /**
+     * The subscriber count text from the channel.
+     */
     String subscriberCountText;
 
+    /**
+     * Creates a new channel search result.
+     * @param jsonObject The json object.
+     */
     public ChannelSearchResult(JsonObject jsonObject) {
         super(jsonObject);
         title = jsonObject.getAsJsonObject("title").getAsJsonPrimitive("simpleText").getAsString();
@@ -22,6 +34,10 @@ public class ChannelSearchResult extends SearchResult {
                         .getAsJsonPrimitive("simpleText").getAsString() : "0";
     }
 
+    /**
+     * Gets the subscriber count.
+     * @return The subscriber count.
+     */
     public long getSubscriber() {
         return NumberUtil.extractLong(subscriberCountText);
     }

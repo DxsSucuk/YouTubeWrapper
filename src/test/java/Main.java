@@ -8,7 +8,7 @@ import java.net.http.HttpResponse;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        YouTubeWrapper.getChannel("UCXuqSBlHAE6Xw-yeJA0Tunw");
+        System.out.println(YouTubeWrapper.getChannel("UCXuqSBlHAE6Xw-yeJA0Tunw"));
     }
 
     public void testStuff() throws Exception {
