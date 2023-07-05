@@ -50,22 +50,20 @@ public class ChannelVideoResult extends ChannelResult {
             }
         }
 
-        if (videoContent == null) {
-            throw new IllegalStateException("No video content found!");
-        }
+        if (videoContent != null) {
+            for (int i = 0; i < videoContent.size(); i++) {
+                JsonObject currentVideoObject = videoContent.get(i).getAsJsonObject();
+                if (currentVideoObject == null) continue;
 
-        for (int i = 0; i < videoContent.size(); i++) {
-            JsonObject currentVideoObject = videoContent.get(i).getAsJsonObject();
-            if (currentVideoObject == null) continue;
-
-            if (currentVideoObject.has("richItemRenderer")) {
-                currentVideoObject = currentVideoObject
-                        .getAsJsonObject("richItemRenderer");
-                if (currentVideoObject.has("content")) {
+                if (currentVideoObject.has("richItemRenderer")) {
                     currentVideoObject = currentVideoObject
-                            .getAsJsonObject("content")
-                            .getAsJsonObject("videoRenderer");
-                    videos.add(new VideoResult(currentVideoObject, true, false));
+                            .getAsJsonObject("richItemRenderer");
+                    if (currentVideoObject.has("content")) {
+                        currentVideoObject = currentVideoObject
+                                .getAsJsonObject("content")
+                                .getAsJsonObject("videoRenderer");
+                        videos.add(new VideoResult(currentVideoObject, true, false));
+                    }
                 }
             }
         }

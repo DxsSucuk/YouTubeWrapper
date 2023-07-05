@@ -50,22 +50,20 @@ public class ChannelShortResult extends ChannelResult {
             }
         }
 
-        if (shortContent == null) {
-            throw new IllegalStateException("No short content found!");
-        }
+        if (shortContent != null) {
+            for (int i = 0; i < shortContent.size(); i++) {
+                JsonObject currentVideoObject = shortContent.get(i).getAsJsonObject();
+                if (currentVideoObject == null) continue;
 
-        for (int i = 0; i < shortContent.size(); i++) {
-            JsonObject currentVideoObject = shortContent.get(i).getAsJsonObject();
-            if (currentVideoObject == null) continue;
-
-            if (currentVideoObject.has("richItemRenderer")) {
-                currentVideoObject = currentVideoObject
-                        .getAsJsonObject("richItemRenderer");
-                if (currentVideoObject.has("content")) {
+                if (currentVideoObject.has("richItemRenderer")) {
                     currentVideoObject = currentVideoObject
-                            .getAsJsonObject("content")
-                            .getAsJsonObject("reelItemRenderer");
-                    shorts.add(new VideoResult(currentVideoObject, true, true));
+                            .getAsJsonObject("richItemRenderer");
+                    if (currentVideoObject.has("content")) {
+                        currentVideoObject = currentVideoObject
+                                .getAsJsonObject("content")
+                                .getAsJsonObject("reelItemRenderer");
+                        shorts.add(new VideoResult(currentVideoObject, true, true));
+                    }
                 }
             }
         }
