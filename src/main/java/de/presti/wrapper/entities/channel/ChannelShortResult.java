@@ -34,7 +34,13 @@ public class ChannelShortResult extends ChannelResult {
 
         for (int i = 0; i < tabs.size(); i++) {
             JsonObject currentTabObject = tabs.get(i)
-                    .getAsJsonObject()
+                    .getAsJsonObject();
+
+            if (currentTabObject == null) continue;
+
+            if (!currentTabObject.has("tabRenderer")) continue;
+
+            currentTabObject = currentTabObject
                     .getAsJsonObject("tabRenderer");
 
             if (currentTabObject.getAsJsonPrimitive("title").getAsString().equalsIgnoreCase("Shorts")) {
