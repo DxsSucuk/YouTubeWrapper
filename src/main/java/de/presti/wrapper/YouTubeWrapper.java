@@ -352,6 +352,27 @@ public class YouTubeWrapper {
                 } else {
                     throw new IOException("Error while sending request (" + errorCode + "): " + jsonElement);
                 }
+            } else if (jsonElement.getAsJsonObject().has("alerts")) {
+                // You might ask yourself why I am doing this and the reason is that sometimes
+                // the API can say something like NUH UH and work the next time.
+                // and I want to prevent the Wrapper from sending too many requests by just limiting it on specific ones.
+
+                if (jsonElement.getAsJsonObject().getAsJsonArray("alerts").size() > 0) {
+                    JsonObject alert = jsonElement.getAsJsonObject().getAsJsonArray("alerts").get(0).getAsJsonObject();
+
+                    if (alert.has("type")) {
+                        if (alert.getAsJsonPrimitive("type").getAsString().equalsIgnoreCase("error")) {
+                            JsonObject alertText = alert.getAsJsonObject("text");
+
+                            if (alertText.has("simpleText") &&
+                                    alertText.getAsJsonPrimitive("simpleText").getAsString()
+                                            .equalsIgnoreCase("Unknown error.")) {
+                                retryAction(callId, path, requestObject);
+                            }
+                        }
+                    }
+                }
+                return retryAction(callId, path, requestObject);
             }
 
             return jsonElement;
