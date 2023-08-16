@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Getter
-@ToString
+@ToString(exclude = "internalObject")
 public class ChannelResult {
 
     /**

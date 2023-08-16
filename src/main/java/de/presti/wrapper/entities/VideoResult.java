@@ -6,6 +6,7 @@ import de.presti.wrapper.utils.NumberUtil;
 import io.sentry.Sentry;
 import io.sentry.SentryEvent;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,7 +21,7 @@ import java.util.Date;
  */
 @Getter
 @Slf4j
-@ToString
+@ToString(exclude = "internalObject")
 public class VideoResult {
 
     /**
@@ -87,6 +88,12 @@ public class VideoResult {
      * The internal json object.
      */
     JsonObject internalObject;
+
+    /**
+     * The time ago of the video (based on YT API response, in milliseconds).
+     */
+    @Setter
+    long timeAgo = -1;
 
     /**
      * Creates a new video result.

@@ -7,7 +7,7 @@ import lombok.*;
  * Represents a search result.
  */
 @Getter
-@ToString
+@ToString(exclude = "internalObject")
 @NoArgsConstructor
 @AllArgsConstructor
 public class SearchResult {

@@ -8,6 +8,7 @@ import de.presti.wrapper.entities.channel.ChannelVideoResult;
 import de.presti.wrapper.entities.search.ChannelSearchResult;
 import de.presti.wrapper.entities.search.SearchResult;
 import de.presti.wrapper.entities.search.VideoSearchResult;
+import de.presti.wrapper.utils.NumberUtil;
 import io.sentry.Sentry;
 import io.sentry.SentryEvent;
 
@@ -20,9 +21,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -214,7 +212,13 @@ public class YouTubeWrapper {
 
             internalObject = send("/player", sendInfoObject).getAsJsonObject();
 
-            return new VideoResult(internalObject.getAsJsonObject(), false, false);
+            VideoResult videoResult = new VideoResult(internalObject.getAsJsonObject(), false, false);
+
+            JsonObject nextObject = send("/next", sendInfoObject).getAsJsonObject();
+
+            videoResult.setTimeAgo(parseRelativeMillisecondsFromNext(nextObject));
+
+            return videoResult;
         } catch (Exception exception) {
             SentryEvent event = new SentryEvent(exception);
             event.setExtra("internalObject", internalObject.toString());
@@ -381,8 +385,6 @@ public class YouTubeWrapper {
         }
     }
 
-    //endregion
-
     /**
      * Retry the action if it failed.
      * @param callId The call ID of the request.
@@ -405,6 +407,43 @@ public class YouTubeWrapper {
             actionRetries.put(callId, tries + 1);
             return send(path, requestObject, callId);
         }
+    }
+
+    //endregion
+
+    /**
+     * This method is used to parse the relative time into milliseconds from the Next API response.
+     * @param jsonObject The {@link JsonObject} to parse.
+     * @return the relative time in milliseconds.
+     */
+    private static long parseRelativeMillisecondsFromNext(JsonObject jsonObject) {
+        String toParse = "-1";
+
+        if (jsonObject.has("contents") && jsonObject.getAsJsonObject("contents").has("twoColumnWatchNextResults")) {
+            jsonObject = jsonObject.getAsJsonObject("contents").getAsJsonObject("twoColumnWatchNextResults");
+            if (jsonObject.has("results")) {
+                jsonObject = jsonObject.getAsJsonObject("results");
+                if (jsonObject.has("results")) {
+                    jsonObject = jsonObject.getAsJsonObject("results");
+                    if (jsonObject.has("contents")) {
+                        jsonObject = jsonObject.getAsJsonArray("contents").get(0).getAsJsonObject();
+                        if (jsonObject.has("videoPrimaryInfoRenderer")) {
+                            jsonObject = jsonObject.getAsJsonObject("videoPrimaryInfoRenderer");
+                            if (jsonObject.has("relativeDateText")) {
+                                jsonObject = jsonObject.getAsJsonObject("relativeDateText");
+                                toParse = jsonObject.getAsJsonPrimitive("simpleText").getAsString();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (toParse.contains("ago")) {
+            return NumberUtil.extractRelativeTime(toParse);
+        }
+
+        return -1;
     }
 
     /**
@@ -437,7 +476,7 @@ public class YouTubeWrapper {
      * @param length the wanted Length.
      * @return the {@link String} with the wanted Length.
      */
-    public static String getRandomId(int length) {
+    private static String getRandomId(int length) {
         StringBuilder end = new StringBuilder();
 
         Random random = ThreadLocalRandom.current();

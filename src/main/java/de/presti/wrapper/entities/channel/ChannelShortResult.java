@@ -44,8 +44,10 @@ public class ChannelShortResult extends ChannelResult {
                     .getAsJsonObject("tabRenderer");
 
             if (currentTabObject.getAsJsonPrimitive("title").getAsString().equalsIgnoreCase("Shorts")) {
-                shortContent = currentTabObject.getAsJsonObject("content")
-                        .getAsJsonObject("richGridRenderer").getAsJsonArray("contents");
+                if (currentTabObject.has("content") && currentTabObject.getAsJsonObject("content").has("richGridRenderer")) {
+                    shortContent = currentTabObject.getAsJsonObject("content")
+                            .getAsJsonObject("richGridRenderer").getAsJsonArray("contents");
+                }
                 break;
             }
         }
