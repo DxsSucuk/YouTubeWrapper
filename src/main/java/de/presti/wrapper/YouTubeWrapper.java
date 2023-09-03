@@ -377,6 +377,14 @@ public class YouTubeWrapper {
                     }
                 }
                 return retryAction(callId, path, requestObject);
+            } else if (jsonElement.getAsJsonObject().has("playabilityStatus")) {
+                JsonObject playabilityStatus = jsonElement.getAsJsonObject().getAsJsonObject("playabilityStatus");
+
+                if (playabilityStatus.has("status")) {
+                    if (playabilityStatus.getAsJsonPrimitive("status").getAsString().equalsIgnoreCase("LOGIN_REQUIRED")) {
+                        throw new IllegalAccessException("Encountered Age-Restricted content!");
+                    }
+                }
             }
 
             return jsonElement;
