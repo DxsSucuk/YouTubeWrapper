@@ -44,8 +44,10 @@ public class ChannelVideoResult extends ChannelResult {
                     .getAsJsonObject("tabRenderer");
 
             if (currentTabObject.getAsJsonPrimitive("title").getAsString().equalsIgnoreCase("Videos")) {
-                videoContent = currentTabObject.getAsJsonObject("content")
-                        .getAsJsonObject("richGridRenderer").getAsJsonArray("contents");
+                if (currentTabObject.has("content") && currentTabObject.getAsJsonObject("content").has("richGridRenderer")) {
+                    videoContent = currentTabObject.getAsJsonObject("content")
+                            .getAsJsonObject("richGridRenderer").getAsJsonArray("contents");
+                }
                 break;
             }
         }
