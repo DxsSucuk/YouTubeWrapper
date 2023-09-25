@@ -70,6 +70,11 @@ public class VideoResult {
     boolean live;
 
     /**
+     * If the video is premiering.
+     */
+    boolean isPremier;
+
+    /**
      * The length of the video in seconds.
      */
     long lengthSeconds;
@@ -112,13 +117,18 @@ public class VideoResult {
         if (jsonObject.has("playabilityStatus")) {
             JsonObject playabilityStatus = jsonObject.getAsJsonObject("playabilityStatus");
             if (playabilityStatus.has("status")) {
-                if (playabilityStatus.getAsJsonPrimitive("status").getAsString().equalsIgnoreCase("error")) {
+                String status = playabilityStatus.getAsJsonPrimitive("status").getAsString();
+                if (status.equalsIgnoreCase("error")) {
                     String errorCode = playabilityStatus.getAsJsonPrimitive("reason").getAsString();
                     log.error("Couldn't get video info! Reason: " + errorCode);
+                    return;
+                } else if (status.equalsIgnoreCase("live_stream_offline")) {
                     return;
                 }
             }
         }
+
+        isPremier = jsonObject.has("upcomingEventData");
 
         try {
             if (importFromChannel) {
@@ -126,7 +136,12 @@ public class VideoResult {
                 JsonArray thumbnailArray = jsonObject.getAsJsonObject("thumbnail").getAsJsonArray("thumbnails");
                 thumbnail = thumbnailArray.get(thumbnailArray.size() - 1).getAsJsonObject()
                         .getAsJsonPrimitive("url").getAsString();
-                viewCountText = jsonObject.getAsJsonObject("viewCountText").getAsJsonPrimitive("simpleText").getAsString();
+
+                if (isPremier) {
+                    viewCountText = jsonObject.getAsJsonObject("viewCountText").getAsJsonArray("runs").get(0).getAsJsonObject().getAsJsonPrimitive("text").getAsString();
+                } else {
+                    viewCountText = jsonObject.getAsJsonObject("viewCountText").getAsJsonPrimitive("simpleText").getAsString();
+                }
 
                 if (importFromShort) {
                     title = jsonObject.getAsJsonObject("headline").getAsJsonPrimitive("simpleText").getAsString();
@@ -134,7 +149,6 @@ public class VideoResult {
                     title = jsonObject.getAsJsonObject("title").getAsJsonArray("runs").get(0).getAsJsonObject()
                             .getAsJsonPrimitive("text").getAsString();
                     durationText = jsonObject.getAsJsonObject("lengthText").getAsJsonPrimitive("simpleText").getAsString();
-                    viewCountText = jsonObject.getAsJsonObject("viewCountText").getAsJsonPrimitive("simpleText").getAsString();
 
                     if (jsonObject.has("descriptionSnippet")) {
                         descriptionSnippet = jsonObject.getAsJsonObject("descriptionSnippet").getAsJsonArray("runs").get(0).getAsJsonObject()
