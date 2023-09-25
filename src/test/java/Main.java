@@ -8,7 +8,10 @@ import java.net.http.HttpResponse;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        System.out.println(YouTubeWrapper.getChannel("UCXuqSBlHAE6Xw-yeJA0Tunw"));
+        String[] ids = new String[] { "UCXuqSBlHAE6Xw-yeJA0Tunw" };
+        for (String id : ids) {
+            System.out.println(YouTubeWrapper.getChannel(id));
+        }
     }
 
     public void testStuff() throws Exception {
