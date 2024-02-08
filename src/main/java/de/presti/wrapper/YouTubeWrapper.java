@@ -412,6 +412,7 @@ public class YouTubeWrapper {
             details.addProperty("message", "Failed to send request after 3 retries.");
             details.addProperty("callId", callId);
             details.addProperty("path", path);
+            details.add("requestObject", requestObject);
             errorObject.add("details", details);
             actionRetries.remove(callId);
             return errorObject;
