@@ -104,6 +104,10 @@ public class YouTubeWrapper {
 
         } catch (Exception exception) {
             SentryEvent event = new SentryEvent(exception);
+            event.setExtra("typ", "Search");
+            event.setExtra("query", query);
+            if (filter != null)
+                event.setExtra("filter", filter.name());
             event.setExtra("internalObject", jsonElement.toString());
             Sentry.captureEvent(event);
             throw exception;
@@ -132,6 +136,8 @@ public class YouTubeWrapper {
             return new ChannelResult(internalObject.getAsJsonObject());
         } catch (Exception exception) {
             SentryEvent event = new SentryEvent(exception);
+            event.setExtra("typ", "Channel");
+            event.setExtra("channel", channelId);
             event.setExtra("internalObject", internalObject.toString());
             Sentry.captureEvent(event);
             throw exception;
@@ -158,6 +164,8 @@ public class YouTubeWrapper {
             return new ChannelVideoResult(internalObject.getAsJsonObject());
         } catch (Exception exception) {
             SentryEvent event = new SentryEvent(exception);
+            event.setExtra("typ", "ChannelVideo");
+            event.setExtra("channel", channelId);
             event.setExtra("internalObject", internalObject.toString());
             Sentry.captureEvent(event);
             throw exception;
@@ -185,6 +193,7 @@ public class YouTubeWrapper {
             return new ChannelShortResult(internalObject.getAsJsonObject());
         } catch (Exception exception) {
             SentryEvent event = new SentryEvent(exception);
+            event.setExtra("typ", "Short");
             event.setExtra("internalObject", internalObject.toString());
             Sentry.captureEvent(event);
             throw exception;
@@ -221,6 +230,8 @@ public class YouTubeWrapper {
             return videoResult;
         } catch (Exception exception) {
             SentryEvent event = new SentryEvent(exception);
+            event.setExtra("isShort", isShort);
+            event.setExtra("typ", "Video");
             event.setExtra("internalObject", internalObject.toString());
             Sentry.captureEvent(event);
             throw exception;

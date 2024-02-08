@@ -188,6 +188,7 @@ public class VideoResult {
         } catch (Exception exception) {
             if (Sentry.isEnabled()) {
                 SentryEvent event = new SentryEvent(exception);
+                event.setExtra("typ", "Video");
                 event.setExtra("internalObject", internalObject.toString());
                 Sentry.captureEvent(event);
             } else {
