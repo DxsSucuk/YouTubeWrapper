@@ -357,11 +357,11 @@ public class YouTubeWrapper {
                     throw new IOException("Error while sending request (" + errorCode + "): " + jsonElement);
                 }
             } else if (jsonElement.getAsJsonObject().has("alerts")) {
-                // You might ask yourself why I am doing this and the reason is that sometimes
+                // You might ask yourself why I am doing this, and the reason is that sometimes
                 // the API can say something like NUH UH and work the next time.
-                // and I want to prevent the Wrapper from sending too many requests by just limiting it on specific ones.
+                // And I want to prevent the Wrapper from sending too many requests by just limiting it on specific ones.
 
-                if (jsonElement.getAsJsonObject().getAsJsonArray("alerts").size() > 0) {
+                if (!jsonElement.getAsJsonObject().getAsJsonArray("alerts").isEmpty()) {
                     JsonObject alert = jsonElement.getAsJsonObject().getAsJsonArray("alerts").get(0).getAsJsonObject();
 
                     if (alert.has("type")) {
@@ -371,12 +371,11 @@ public class YouTubeWrapper {
                             if (alertText.has("simpleText") &&
                                     alertText.getAsJsonPrimitive("simpleText").getAsString()
                                             .equalsIgnoreCase("Unknown error.")) {
-                                retryAction(callId, path, requestObject);
+                                return retryAction(callId, path, requestObject);
                             }
                         }
                     }
                 }
-                return retryAction(callId, path, requestObject);
             } else if (jsonElement.getAsJsonObject().has("playabilityStatus")) {
                 JsonObject playabilityStatus = jsonElement.getAsJsonObject().getAsJsonObject("playabilityStatus");
 
@@ -408,7 +407,12 @@ public class YouTubeWrapper {
 
         if (tries >= 3) {
             JsonObject errorObject = new JsonObject();
-            errorObject.addProperty("failed", true);
+            errorObject.addProperty("success", false);
+            JsonObject details = new JsonObject();
+            details.addProperty("message", "Failed to send request after 3 retries.");
+            details.addProperty("callId", callId);
+            details.addProperty("path", path);
+            errorObject.add("details", details);
             actionRetries.remove(callId);
             return errorObject;
         } else {
