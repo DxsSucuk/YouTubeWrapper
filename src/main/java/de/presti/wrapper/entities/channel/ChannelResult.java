@@ -71,12 +71,14 @@ public class ChannelResult {
     public ChannelResult(JsonObject jsonObject) {
         internalObject = jsonObject;
 
-        if (internalObject.has("failed") && internalObject.getAsJsonPrimitive("failed").getAsBoolean()) {
+        if (internalObject.has("success") && !internalObject.getAsJsonPrimitive("success").getAsBoolean()) {
             log.error("Couldn't get video info! Reason: Failed sending a request");
             return;
         }
 
         subscriberCountText = jsonObject.getAsJsonObject("header")
+                // This line apparently causes a NullPointerException sometimes?
+                // Couldn't replicate it, but it's in the logs.
                 .getAsJsonObject("c4TabbedHeaderRenderer").getAsJsonObject("subscriberCountText")
                 .getAsJsonPrimitive("simpleText").getAsString();
 
