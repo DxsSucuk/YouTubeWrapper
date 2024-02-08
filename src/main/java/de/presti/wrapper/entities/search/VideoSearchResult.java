@@ -31,9 +31,12 @@ public class VideoSearchResult extends SearchResult {
 
         id = jsonObject.getAsJsonPrimitive("videoId").getAsString();
 
-        ownerId = jsonObject.getAsJsonObject("ownerText").getAsJsonArray("runs").get(0).getAsJsonObject()
-                .getAsJsonObject("navigationEndpoint").getAsJsonObject("browseEndpoint")
-                .getAsJsonPrimitive("browseId").getAsString();
+        JsonObject navigationEndpoint = jsonObject.getAsJsonObject("ownerText").getAsJsonArray("runs").get(0).getAsJsonObject()
+                .getAsJsonObject("navigationEndpoint");
+
+        if (navigationEndpoint.has("browseEndpoint")) {
+            ownerId = navigationEndpoint.getAsJsonObject("browseEndpoint").getAsJsonPrimitive("browseId").getAsString();
+        }
         
         if (jsonObject.has("viewCountText") && jsonObject.getAsJsonObject("viewCountText").has("simpleText")) {
             viewCountText = jsonObject.getAsJsonObject("viewCountText").getAsJsonPrimitive("simpleText").getAsString();
