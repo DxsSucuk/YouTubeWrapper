@@ -158,9 +158,12 @@ public class VideoResult {
             } else {
                 JsonArray formats = jsonObject.getAsJsonObject("streamingData").getAsJsonArray("formats");
 
-                if (formats != null)
-                    uploadDate = formats.get(formats.size() - 1)
-                            .getAsJsonObject().getAsJsonPrimitive("lastModified").getAsLong() / 1000;
+                if (formats != null && !formats.isEmpty()) {
+                    JsonObject formatObject = formats.get(formats.size() - 1)
+                            .getAsJsonObject();
+                    if (formatObject.has("lastModified"))
+                        uploadDate = formatObject.getAsJsonPrimitive("lastModified").getAsLong() / 1000;
+                }
 
                 try {
                     actualUploadDate = new SimpleDateFormat("yyyy-MM-dd").parse(jsonObject.getAsJsonObject("microformat")
