@@ -98,13 +98,15 @@ public class VideoResult {
      * The time ago of the video (based on YT API response, in milliseconds).
      */
     @Setter
+    @Getter
     long timeAgo = -1;
 
     /**
      * Creates a new video result.
-     * @param jsonObject The json object.
+     *
+     * @param jsonObject        The json object.
      * @param importFromChannel If the video result should be imported from a channel.
-     * @param importFromShort If the video result should be imported from a short.
+     * @param importFromShort   If the video result should be imported from a short.
      */
     public VideoResult(JsonObject jsonObject, boolean importFromChannel, boolean importFromShort) {
         internalObject = jsonObject;
@@ -202,6 +204,7 @@ public class VideoResult {
 
     /**
      * Gets the view count.
+     *
      * @return The view count.
      */
     public long getViews() {

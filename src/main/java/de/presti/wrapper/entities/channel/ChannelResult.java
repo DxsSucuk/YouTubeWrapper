@@ -66,6 +66,7 @@ public class ChannelResult {
 
     /**
      * Creates a new channel result.
+     *
      * @param jsonObject The json object.
      */
     public ChannelResult(JsonObject jsonObject) {
@@ -76,11 +77,12 @@ public class ChannelResult {
             return;
         }
 
-        subscriberCountText = jsonObject.getAsJsonObject("header")
-                // This line apparently causes a NullPointerException sometimes?
-                // Couldn't replicate it, but it's in the logs.
-                .getAsJsonObject("c4TabbedHeaderRenderer").getAsJsonObject("subscriberCountText")
-                .getAsJsonPrimitive("simpleText").getAsString();
+        if (jsonObject.has("header") && jsonObject.has("c4TabbedHeaderRenderer")) {
+            // Apparently YouTube sometimes does not send the c4TabbedHeaderRenderer, so we need to check for it.
+            subscriberCountText = jsonObject.getAsJsonObject("header")
+                    .getAsJsonObject("c4TabbedHeaderRenderer").getAsJsonObject("subscriberCountText")
+                    .getAsJsonPrimitive("simpleText").getAsString();
+        }
 
         JsonObject metadata = jsonObject.getAsJsonObject("metadata").getAsJsonObject("channelMetadataRenderer");
 
@@ -101,9 +103,11 @@ public class ChannelResult {
 
     /**
      * Gets the subscriber count.
+     *
      * @return The subscriber count.
      */
     public long getSubscriber() {
+        if (subscriberCountText == null) return 0;
         return NumberUtil.extractLong(subscriberCountText);
     }
 
