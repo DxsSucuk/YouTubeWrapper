@@ -28,6 +28,10 @@ public class ChannelVideoResult extends ChannelResult {
     public ChannelVideoResult(JsonObject jsonObject) {
         super(jsonObject);
 
+        if (internalObject.has("success") && !internalObject.getAsJsonPrimitive("success").getAsBoolean()) {
+            return;
+        }
+
         JsonArray tabs = jsonObject.getAsJsonObject("contents").getAsJsonObject("twoColumnBrowseResultsRenderer").getAsJsonArray("tabs");
 
         JsonArray videoContent = null;

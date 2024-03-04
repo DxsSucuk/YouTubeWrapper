@@ -86,19 +86,24 @@ public class ChannelResult {
 
         JsonObject metadata = jsonObject.getAsJsonObject("metadata").getAsJsonObject("channelMetadataRenderer");
 
-        id = metadata.getAsJsonPrimitive("externalId").getAsString();
+        try {
+            id = metadata.getAsJsonPrimitive("externalId").getAsString();
 
-        title = metadata.getAsJsonPrimitive("title").getAsString();
-        description = metadata.getAsJsonPrimitive("description").getAsString();
-        channelUrl = metadata.getAsJsonPrimitive("channelUrl").getAsString();
-        vanityUrl = metadata.getAsJsonPrimitive("vanityChannelUrl").getAsString();
+            title = metadata.getAsJsonPrimitive("title").getAsString();
+            description = metadata.getAsJsonPrimitive("description").getAsString();
+            channelUrl = metadata.getAsJsonPrimitive("channelUrl").getAsString();
+            vanityUrl = metadata.getAsJsonPrimitive("vanityChannelUrl").getAsString();
 
-        rssUrl = metadata.getAsJsonPrimitive("rssUrl").getAsString();
+            rssUrl = metadata.getAsJsonPrimitive("rssUrl").getAsString();
 
-        avatarUrl = metadata.getAsJsonObject("avatar")
-                .getAsJsonArray("thumbnails").get(0).getAsJsonObject().getAsJsonPrimitive("url").getAsString();
+            avatarUrl = metadata.getAsJsonObject("avatar")
+                    .getAsJsonArray("thumbnails").get(0).getAsJsonObject().getAsJsonPrimitive("url").getAsString();
 
-        familySafe = metadata.getAsJsonPrimitive("isFamilySafe").getAsBoolean();
+            familySafe = metadata.getAsJsonPrimitive("isFamilySafe").getAsBoolean();
+        } catch (Exception exception) {
+            log.info(metadata.toString());
+            throw exception;
+        }
     }
 
     /**

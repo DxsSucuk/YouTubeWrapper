@@ -26,6 +26,11 @@ public class ChannelSearchResult extends SearchResult {
      */
     public ChannelSearchResult(JsonObject jsonObject) {
         super(jsonObject);
+
+        if (internalObject.has("success") && !internalObject.getAsJsonPrimitive("success").getAsBoolean()) {
+            return;
+        }
+
         title = jsonObject.getAsJsonObject("title").getAsJsonPrimitive("simpleText").getAsString();
         id = jsonObject.getAsJsonPrimitive("channelId").getAsString();
         ownerId = id;
