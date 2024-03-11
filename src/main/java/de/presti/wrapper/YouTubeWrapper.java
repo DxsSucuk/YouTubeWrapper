@@ -365,6 +365,13 @@ public class YouTubeWrapper {
                 } else if (errorCode == 429 || (errorCode >= 500 && errorCode <= 599)) {
                     return retryAction(callId, path, requestObject);
                 } else {
+                    SentryEvent event = new SentryEvent();
+                    event.setExtra("message", "New unchecked error.");
+                    event.setExtra("path", path);
+                    event.setExtra("requestObject", requestObject.toString());
+                    event.setExtra("responseObject", jsonElement.toString());
+                    Sentry.captureEvent(event);
+
                     throw new IOException("Error while sending request (" + errorCode + "): " + jsonElement);
                 }
             } else if (jsonElement.getAsJsonObject().has("alerts")) {
