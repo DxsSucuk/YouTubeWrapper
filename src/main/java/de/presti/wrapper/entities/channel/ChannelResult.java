@@ -77,7 +77,7 @@ public class ChannelResult {
             return;
         }
 
-        if (jsonObject.has("header") && jsonObject.has("c4TabbedHeaderRenderer")) {
+        if (jsonObject.has("header") && jsonObject.getAsJsonObject("header").has("c4TabbedHeaderRenderer")) {
             // Apparently YouTube sometimes does not send the c4TabbedHeaderRenderer, so we need to check for it.
             subscriberCountText = jsonObject.getAsJsonObject("header")
                     .getAsJsonObject("c4TabbedHeaderRenderer").getAsJsonObject("subscriberCountText")

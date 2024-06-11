@@ -12,13 +12,16 @@ public class NumberUtil {
      */
     public static Long extractLong(String s) {
         s = s.replace(" subscribers", "");
+        s = s.replace("B", "00000000");
         s = s.replace("M", "00000");
         s = s.replace("K", "00");
+
         if (!s.contains(".")) {
             s += "0";
+        } else {
+            s = s.replace(".", "");
         }
 
-        s = s.replace(".", "");
         return Long.parseLong(s.replaceAll("[^0-9]", ""));
     }
 

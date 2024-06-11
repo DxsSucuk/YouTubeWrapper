@@ -1,5 +1,6 @@
 import com.google.gson.*;
 import de.presti.wrapper.YouTubeWrapper;
+import de.presti.wrapper.entities.channel.ChannelResult;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -10,7 +11,9 @@ public class Main {
     public static void main(String[] args) throws Exception {
         String[] ids = new String[] { "UCXuqSBlHAE6Xw-yeJA0Tunw" };
         for (String id : ids) {
-            System.out.println(YouTubeWrapper.getChannel(id));
+            ChannelResult channel = YouTubeWrapper.getChannel(id);
+            System.out.println(channel.getSubscriber());
+            System.out.println(channel);
         }
     }
 
