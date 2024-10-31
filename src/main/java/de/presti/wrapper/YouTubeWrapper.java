@@ -6,6 +6,7 @@ import de.presti.wrapper.entities.channel.ChannelResult;
 import de.presti.wrapper.entities.channel.ChannelShortResult;
 import de.presti.wrapper.entities.channel.ChannelVideoResult;
 import de.presti.wrapper.entities.search.ChannelSearchResult;
+import de.presti.wrapper.entities.search.SearchFilter;
 import de.presti.wrapper.entities.search.SearchResult;
 import de.presti.wrapper.entities.search.VideoSearchResult;
 import de.presti.wrapper.utils.NumberUtil;
@@ -65,20 +66,20 @@ public class YouTubeWrapper {
     /**
      * Search for something based on the query and filter on YouTube.
      * @param query The Query String.
-     * @param filter the {@link SearchResult.FILTER}.
+     * @param filter the {@link SearchFilter}.
      * @return a List of {@link SearchResult}.
      * @throws IllegalAccessException If a API-Token is invalid.
      * @throws IOException If there was an error while trying to process the request.
      * @throws InterruptedException If the HTTP request was interrupted.
      */
-    public static List<SearchResult> search(String query, SearchResult.FILTER filter) throws IllegalAccessException, IOException, InterruptedException {
+    public static List<SearchResult> search(String query, SearchFilter filter) throws IllegalAccessException, IOException, InterruptedException {
         List<SearchResult> results = new ArrayList<>();
         query = URLEncoder.encode(query, StandardCharsets.UTF_8);
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("query", query);
 
-        if (filter != null && filter != SearchResult.FILTER.NONE) {
+        if (filter != null && filter != SearchFilter.NONE) {
             jsonObject.addProperty("params", filter.getParams());
         }
 
