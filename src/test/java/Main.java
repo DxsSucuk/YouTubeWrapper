@@ -1,6 +1,9 @@
 import com.google.gson.*;
 import de.presti.wrapper.YouTubeWrapper;
+import de.presti.wrapper.entities.VideoResult;
 import de.presti.wrapper.entities.channel.ChannelResult;
+import de.presti.wrapper.entities.channel.ChannelShortResult;
+import de.presti.wrapper.entities.channel.ChannelVideoResult;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -9,11 +12,19 @@ import java.net.http.HttpResponse;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        String[] ids = new String[] { "UCXuqSBlHAE6Xw-yeJA0Tunw" };
+        String[] ids = new String[] { "UCXuqSBlHAE6Xw-yeJA0Tunw", "UCxLD4Sqi6CQ1uscjQrzMIPQ" };
         for (String id : ids) {
             ChannelResult channel = YouTubeWrapper.getChannel(id);
             System.out.println(channel.getSubscriber());
             System.out.println(channel);
+
+            ChannelShortResult shorts = YouTubeWrapper.getChannelShort(id);
+            System.out.println(shorts.getShorts().size());
+            System.out.println(shorts.getShorts());
+
+            ChannelVideoResult videos = YouTubeWrapper.getChannelVideo(id);
+            System.out.println(videos.getVideos().size());
+            System.out.println(videos.getVideos());
         }
     }
 

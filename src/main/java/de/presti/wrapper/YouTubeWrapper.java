@@ -9,6 +9,7 @@ import de.presti.wrapper.entities.search.ChannelSearchResult;
 import de.presti.wrapper.entities.search.SearchResult;
 import de.presti.wrapper.entities.search.VideoSearchResult;
 import de.presti.wrapper.utils.NumberUtil;
+import de.presti.wrapper.utils.ParserUtil;
 import io.sentry.Sentry;
 import io.sentry.SentryEvent;
 
@@ -221,7 +222,7 @@ public class YouTubeWrapper {
 
             internalObject = send("/player", sendInfoObject).getAsJsonObject();
 
-            VideoResult videoResult = new VideoResult(internalObject.getAsJsonObject(), false, false);
+            VideoResult videoResult = new VideoResult(internalObject.getAsJsonObject(), false, isShort);
 
             JsonObject nextObject = send("/next", sendInfoObject).getAsJsonObject();
 
@@ -280,74 +281,7 @@ public class YouTubeWrapper {
             JsonElement jsonElement;
             String responseBody = httpResponse.body();
             try {
-                jsonElement = JsonParser.parseString(responseBody);
-                if (jsonElement.isJsonObject()) {
-                    JsonObject jsonObject = jsonElement.getAsJsonObject();
-
-                    // Remove useless information.
-
-                    if (jsonObject.has("responseContext")) {
-                        jsonObject.remove("responseContext");
-                    }
-
-                    if (jsonObject.has("topbar")) {
-                        jsonObject.remove("topbar");
-                    }
-
-                    if (jsonObject.has("trackingParams")) {
-                        jsonObject.remove("trackingParams");
-                    }
-
-                    if (jsonObject.has("microformat")) {
-                        JsonObject microformat = jsonObject.getAsJsonObject("microformat");
-
-                        if (microformat.has("microformatDataRenderer")) {
-                            JsonObject microformatRender = microformat.getAsJsonObject("microformatDataRenderer");
-
-                            if (microformatRender.has("availableCountries")) {
-                                microformatRender.remove("availableCountries");
-                            }
-
-                            if (microformatRender.has("linkAlternates")) {
-                                microformatRender.remove("linkAlternates");
-                            }
-
-                            microformat.add("microformatDataRenderer", microformatRender);
-                        }
-
-                        jsonObject.add("microformat", microformat);
-                    }
-
-                    if (jsonObject.has("metadata")) {
-                        JsonObject metadata = jsonObject.getAsJsonObject("metadata");
-
-                        if (metadata.has("channelMetadataRenderer")) {
-                            JsonObject channelMetadataRenderer = metadata.getAsJsonObject("channelMetadataRenderer");
-
-                            if (channelMetadataRenderer.has("availableCountryCodes")) {
-                                channelMetadataRenderer.remove("availableCountryCodes");
-                            }
-
-                            if (channelMetadataRenderer.has("androidAppindexingLink")) {
-                                channelMetadataRenderer.remove("androidAppindexingLink");
-                            }
-
-                            if (channelMetadataRenderer.has("iosAppindexingLink")) {
-                                channelMetadataRenderer.remove("iosAppindexingLink");
-                            }
-
-                            if (channelMetadataRenderer.has("androidDeepLink")) {
-                                channelMetadataRenderer.remove("androidDeepLink");
-                            }
-
-                            metadata.add("channelMetadataRenderer", channelMetadataRenderer);
-                        }
-
-                        jsonObject.add("metadata", metadata);
-                    }
-
-                    jsonElement = jsonObject;
-                }
+                jsonElement = ParserUtil.stripJson(JsonParser.parseString(responseBody));
             } catch (Exception exception) {
                 String trimmedBody = responseBody.trim().toLowerCase();
                 if (trimmedBody.startsWith("<!doctype html>") && trimmedBody.contains("<title>error 5")) {
@@ -460,17 +394,14 @@ public class YouTubeWrapper {
                         jsonObject = jsonObject.getAsJsonArray("contents").get(0).getAsJsonObject();
                         if (jsonObject.has("videoPrimaryInfoRenderer")) {
                             jsonObject = jsonObject.getAsJsonObject("videoPrimaryInfoRenderer");
-                            if (jsonObject.has("relativeDateText")) {
-                                jsonObject = jsonObject.getAsJsonObject("relativeDateText");
-                                toParse = jsonObject.getAsJsonPrimitive("simpleText").getAsString();
-                            }
+                            toParse = ParserUtil.extractSimpleText(jsonObject, "relativeDateText");
                         }
                     }
                 }
             }
         }
 
-        if (toParse.contains("ago")) {
+        if (toParse != null && toParse.contains("ago")) {
             return NumberUtil.extractRelativeTime(toParse);
         }
 
@@ -489,8 +420,10 @@ public class YouTubeWrapper {
         client.addProperty("hl", "en");
         client.addProperty("gl", "US");
         client.addProperty("clientName", "WEB");
-        client.addProperty("clientVersion", "2.20210721.00.00");
+        client.addProperty("clientVersion", "2.20241029.07.00");
         client.addProperty("clientFormFactor", "UNKNOWN_FORM_FACTOR");
+        client.addProperty("browserName", "Chrome");
+        client.addProperty("browserVersion", "130.0.0.0");
 
         mainAppWebInfo.addProperty("graftUrl", "https://www.youtube.com/");
 

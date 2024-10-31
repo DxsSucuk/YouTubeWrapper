@@ -2,6 +2,7 @@ package de.presti.wrapper.entities.search;
 
 import com.google.gson.JsonObject;
 import de.presti.wrapper.utils.NumberUtil;
+import de.presti.wrapper.utils.ParserUtil;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,19 +36,7 @@ public class ChannelSearchResult extends SearchResult {
         id = jsonObject.getAsJsonPrimitive("channelId").getAsString();
         ownerId = id;
 
-        if (jsonObject.has("videoCountText")) {
-            JsonObject videoCountText = jsonObject.getAsJsonObject("videoCountText");
-            if (videoCountText.has("runs")) {
-                JsonObject runs = videoCountText.getAsJsonArray("runs").get(0).getAsJsonObject();
-                if (runs.has("text")) {
-                    subscriberCountText = runs.getAsJsonPrimitive("text").getAsString();
-                }
-            }
-
-            if (videoCountText.has("simpleText")) {
-                subscriberCountText = videoCountText.getAsJsonPrimitive("simpleText").getAsString();
-            }
-        }
+        subscriberCountText = ParserUtil.extractSimpleText(jsonObject, "videoCountText");
     }
 
     /**

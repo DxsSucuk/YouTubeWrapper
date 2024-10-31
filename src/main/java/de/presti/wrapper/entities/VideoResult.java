@@ -3,6 +3,7 @@ package de.presti.wrapper.entities;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.presti.wrapper.utils.NumberUtil;
+import de.presti.wrapper.utils.ParserUtil;
 import io.sentry.Sentry;
 import io.sentry.SentryEvent;
 import lombok.Getter;
@@ -98,7 +99,6 @@ public class VideoResult {
      * The time ago of the video (based on YT API response, in milliseconds).
      */
     @Setter
-    @Getter
     long timeAgo = -1;
 
     /**
@@ -134,27 +134,46 @@ public class VideoResult {
 
         try {
             if (importFromChannel) {
-                id = jsonObject.getAsJsonPrimitive("videoId").getAsString();
-                JsonArray thumbnailArray = jsonObject.getAsJsonObject("thumbnail").getAsJsonArray("thumbnails");
-                thumbnail = thumbnailArray.get(thumbnailArray.size() - 1).getAsJsonObject()
-                        .getAsJsonPrimitive("url").getAsString();
-
-                if (isPremier) {
-                    viewCountText = jsonObject.getAsJsonObject("viewCountText").getAsJsonArray("runs").get(0).getAsJsonObject().getAsJsonPrimitive("text").getAsString();
-                } else {
-                    viewCountText = jsonObject.getAsJsonObject("viewCountText").getAsJsonPrimitive("simpleText").getAsString();
-                }
-
                 if (importFromShort) {
-                    title = jsonObject.getAsJsonObject("headline").getAsJsonPrimitive("simpleText").getAsString();
+                    if (jsonObject.has("entityId")) {
+                        String entityId = jsonObject.getAsJsonPrimitive("entityId").getAsString();
+                        if (entityId.startsWith("shorts-shelf-item-b-")) {
+                            id = entityId.substring("shorts-shelf-item-b-".length());
+                        } else if (entityId.startsWith("shorts-shelf-item-")) {
+                            id = entityId.substring("shorts-shelf-item-".length());
+                        }
+                    }
+
+                    if (jsonObject.has("overlayMetadata")) {
+                        JsonObject overlayMetaData = jsonObject.getAsJsonObject("overlayMetadata");
+                        if (overlayMetaData.has("primaryText")) {
+                            title = ParserUtil.extractSimpleText(jsonObject, "primaryText");
+                        }
+
+                        if (overlayMetaData.has("secondaryText")) {
+                            viewCountText = ParserUtil.extractSimpleText(jsonObject, "secondaryText");
+                        }
+                    }
+
+                    if (jsonObject.has("thumbnail")) {
+                        JsonObject thumbnailObject = jsonObject.getAsJsonObject("thumbnail");
+                        thumbnail = ParserUtil.extractSimpleText(thumbnailObject, "thumbnail");
+                    }
                 } else {
-                    title = jsonObject.getAsJsonObject("title").getAsJsonArray("runs").get(0).getAsJsonObject()
-                            .getAsJsonPrimitive("text").getAsString();
-                    durationText = jsonObject.getAsJsonObject("lengthText").getAsJsonPrimitive("simpleText").getAsString();
+                    id = jsonObject.getAsJsonPrimitive("videoId").getAsString();
+                    JsonArray thumbnailArray = jsonObject.getAsJsonObject("thumbnail").getAsJsonArray("thumbnails");
+                    thumbnail = thumbnailArray.get(thumbnailArray.size() - 1).getAsJsonObject()
+                            .getAsJsonPrimitive("url").getAsString();
+
+                    viewCountText = ParserUtil.extractSimpleText(jsonObject, "viewCountText");
+
+
+                    title =  ParserUtil.extractSimpleText(jsonObject, "title");
+                    durationText = ParserUtil.extractSimpleText(jsonObject, "lengthText");
+                    lengthSeconds = durationText != null ? NumberUtil.extractLength(durationText) : -1;
 
                     if (jsonObject.has("descriptionSnippet")) {
-                        descriptionSnippet = jsonObject.getAsJsonObject("descriptionSnippet").getAsJsonArray("runs").get(0).getAsJsonObject()
-                                .getAsJsonPrimitive("text").getAsString();
+                        descriptionSnippet = ParserUtil.extractSimpleText(jsonObject, "descriptionSnippet");
                     }
                 }
             } else {

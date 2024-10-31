@@ -67,7 +67,7 @@ public class ChannelShortResult extends ChannelResult {
                     if (currentVideoObject.has("content")) {
                         currentVideoObject = currentVideoObject
                                 .getAsJsonObject("content")
-                                .getAsJsonObject("reelItemRenderer");
+                                .getAsJsonObject("shortsLockupViewModel");
                         shorts.add(new VideoResult(currentVideoObject, true, true));
                     }
                 }

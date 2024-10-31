@@ -2,6 +2,7 @@ package de.presti.wrapper.entities.channel;
 
 import com.google.gson.JsonObject;
 import de.presti.wrapper.utils.NumberUtil;
+import de.presti.wrapper.utils.ParserUtil;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -79,9 +80,8 @@ public class ChannelResult {
 
         if (jsonObject.has("header") && jsonObject.getAsJsonObject("header").has("c4TabbedHeaderRenderer")) {
             // Apparently YouTube sometimes does not send the c4TabbedHeaderRenderer, so we need to check for it.
-            subscriberCountText = jsonObject.getAsJsonObject("header")
-                    .getAsJsonObject("c4TabbedHeaderRenderer").getAsJsonObject("subscriberCountText")
-                    .getAsJsonPrimitive("simpleText").getAsString();
+            subscriberCountText = ParserUtil.extractSimpleText(jsonObject.getAsJsonObject("header")
+                    .getAsJsonObject("c4TabbedHeaderRenderer"), "subscriberCountText");
         }
 
         JsonObject metadata = jsonObject.getAsJsonObject("metadata").getAsJsonObject("channelMetadataRenderer");
@@ -96,8 +96,7 @@ public class ChannelResult {
 
             rssUrl = metadata.getAsJsonPrimitive("rssUrl").getAsString();
 
-            avatarUrl = metadata.getAsJsonObject("avatar")
-                    .getAsJsonArray("thumbnails").get(0).getAsJsonObject().getAsJsonPrimitive("url").getAsString();
+            avatarUrl = ParserUtil.extractSimpleText(metadata.getAsJsonObject("avatar"), "thumbnails");
 
             familySafe = metadata.getAsJsonPrimitive("isFamilySafe").getAsBoolean();
         } catch (Exception exception) {

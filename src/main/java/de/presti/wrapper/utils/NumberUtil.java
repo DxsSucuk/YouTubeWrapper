@@ -11,10 +11,13 @@ public class NumberUtil {
      * @return the extracted actual long.
      */
     public static Long extractLong(String s) {
-        s = s.replace(" subscribers", "");
+        s = s.replace("subscribers", "");
+        s = s.replace("views", "");
+        s = s.trim();
         s = s.replace("B", "00000000");
         s = s.replace("M", "00000");
         s = s.replace("K", "00");
+        s = s.trim();
 
         if (!s.contains(".")) {
             s += "0";
@@ -53,5 +56,27 @@ public class NumberUtil {
         }
 
         return time;
+    }
+
+    /**
+     * Extract the length based on a string. Example 1:30 would be 90.
+     * @param s the string.
+     * @return the time string in seconds.
+     */
+    public static long extractLength(String s) {
+        String[] split = s.split(":");
+        long hours = 0;
+        long minutes = 0;
+        long seconds = 0;
+        if (split.length == 3) {
+            hours = Long.parseLong(split[0]);
+            minutes = Long.parseLong(split[1]);
+            seconds = Long.parseLong(split[2]);
+        } else if (split.length == 2) {
+            minutes = Long.parseLong(split[0]);
+            seconds = Long.parseLong(split[1]);
+        }
+
+        return hours * 3600 + minutes * 60 + seconds;
     }
 }
